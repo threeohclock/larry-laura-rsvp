@@ -5,6 +5,7 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.ext.webapp import template
+from appengine_utilities import sessions
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 def GetTemplatePath(filename):
@@ -73,7 +74,16 @@ class SecretWord(webapp.RequestHandler):
     self.response.out.write(template.render(GetTemplatePath('is_coming.html'), {'name': party.name}))
    
 class YesOrNo(webapp.RequestHandler):      
-  pass
+   def post(self):
+    """Handle yes and no responses."""
+    coming = self.request.get('coming')
+    self.response.out.write('DEBUG: coming: "%s"<br>' % coming)
+    if coming == 'no':
+      return
+    if coming == 'yes':
+      return
+    self.response.out.write('DEBUG: coming was not yes or no!<br>')
+    
 
 def main():
     application = webapp.WSGIApplication([('/', LandingWithoutKeyword),
