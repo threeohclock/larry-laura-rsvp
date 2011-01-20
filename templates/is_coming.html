@@ -6,8 +6,10 @@
 <p>Welcome, {{ name }}!</p>
 <p>Will one or more people from your invitation be joining us?
   <form action="/yesorno" method="post">
-    <input type="radio" name="coming" value="yes">We'll be there!<br>
-    <input type="radio" name="coming" value="no" checked>Sorry, we can't make it.<br>
+    <input type="radio" name="coming" value="yes"
+      {% if coming %}checked{% endif %}>We'll be there!<br>
+    <input type="radio" name="coming" value="no" 
+      {% if not_coming %}checked{% endif %}>Sorry, we can't make it.<br>
     <div><input type="submit" value="OK"></div>
   </form>
 </p>

@@ -7,9 +7,8 @@ from google.appengine.ext.webapp import util
 from google.appengine.ext.webapp import template
 from appengine_utilities import sessions
 
-template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-def GetTemplatePath(filename):
-  return os.path.join(template_dir, filename)
+DEBUGGING = True
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 
 class Party(db.Model):
   name = db.StringProperty(required=True)
@@ -30,59 +29,97 @@ class Party(db.Model):
   notes = db.TextProperty()
   date = db.DateTimeProperty(auto_now_add=True)
 
-class PopulateTestData(webapp.RequestHandler):
+
+class RequestHandler(webapp.RequestHandler):
+  def WriteTemplate(self, filename, kwargs):
+    self.response.out.write(template.render(os.path.join(TEMPLATE_DIR, filename), kwargs))
+
+  def DEBUG(self, msg):
+    if not DEBUGGING:
+      return
+    self.response.out.write('DEBUG: ' + msg + '<br />')
+
+  def ERROR(self, msg, filename='error.html'):
+    self.WriteTemplate(filename, {'error': msg})
+
+def GetSession():
+  return sessions.Session(writer="cookie")
+
+def GetUserFromSession():
+  sess = GetSession()
+  party = Party.get_by_id(sess['party_key_id'])
+  if not party:
+    self.ERROR('Failure trying to look up your account from your session.')
+  return party
+
+class PopulateTestData(RequestHandler):
   def get(self):
     foo = Party(name='Test Party 1', secret='foo', email='datavortex+foo@gmail.com')
     bar = Party(name='Test Party 2', secret='bar', email='datavortex+bar@gmail.com')
     foo.put()
     bar.put()
-    self.response.out.write('Created test data.')
+    self.DEBUG('Created test data.')
     
 
-class LandingWithoutKeyword(webapp.RequestHandler):
+class LandingWithoutKeyword(RequestHandler):
   """Initial Page that prompts for secret word. """
   def get(self):
-    path = GetTemplatePath('get_keyword.html')
-    self.response.out.write(template.render(path, {}))
+    self.WriteTemplate('get_keyword.html', {})
 
-class SecretWord(webapp.RequestHandler):
+class SecretWord(RequestHandler):
   def get(self):
     """Gets secret word from URL."""
     secret = self.request.path.lstrip('/').strip().lower()
-    self.response.out.write('DEBUG: secret: "%s"<br>' % secret)
+    self.DEBUG('secret: "%s"' % secret)
     self.HandleSecretWord(secret)
 
   def post(self):
     """Get the secret word from a form."""
     secret = self.request.get('keyword').strip().lower()
-    self.response.out.write('DEBUG: secret: "%s"<br>' % secret)
+    self.DEBUG('secret: "%s"' % secret)
     self.HandleSecretWord(secret)
 
   def HandleSecretWord(self, secret_word):
     if not secret_word:
-      self.response.out.write('DEBUG: Secret word cannot be blank!<br>')
+      self.ERROR('Secret word cannot be blank!', 'get_keyword.html')
       return
     parties = db.GqlQuery("SELECT * FROM Party WHERE secret = :1 LIMIT 2", secret_word)
     matched = parties.count()
     if matched > 1:
-      self.response.out.write('ERROR: Got more than one secret word match: %s' % [p.name for p in parties])
+      self.ERROR('Got more than one wedding party matched against secret word: %s' % [p.name for p in parties])
       return
     if not matched:
-      self.response.out.write('ERROR: No parties with that secret word found.')
+      self.ERROR('No parties with that secret word found.', 'get_keyword.html')
       return    
     party = parties.get()
-    self.response.out.write(template.render(GetTemplatePath('is_coming.html'), {'name': party.name}))
+    sess = GetSession()
+    sess['party_key_id'] = party.key().id()
+    template_vars = {'name': party.name}
+    self.DEBUG('Is coming type: %s' % party.is_coming)
+    if party.is_coming is not None:
+      if party.is_coming:
+        template_vars['coming'] = True
+      else:
+        template_vars['not_coming'] = True
+    self.WriteTemplate('is_coming.html', template_vars)
    
-class YesOrNo(webapp.RequestHandler):      
+class YesOrNo(RequestHandler):      
    def post(self):
     """Handle yes and no responses."""
     coming = self.request.get('coming')
-    self.response.out.write('DEBUG: coming: "%s"<br>' % coming)
+    self.DEBUG('coming: "%s"' % coming)
+    party = GetUserFromSession()
     if coming == 'no':
+      party.is_coming = False
+      party.put()
+      self.DEBUG('Sorry, we will miss you!')
       return
     if coming == 'yes':
+      party.is_coming = True
+      party.put()
+      self.DEBUG('Hooray!  See you there!')
       return
-    self.response.out.write('DEBUG: coming was not yes or no!<br>')
+    self.DEBUG('coming was not yes or no!')
     
 
 def main():
@@ -91,7 +128,7 @@ def main():
                                           ('/secretword', SecretWord),
                                           ('/yesorno', YesOrNo),
                                           ('/.{1,10}', SecretWord)],
-                                         debug=True)
+                                         debug=DEBUGGING)
     util.run_wsgi_app(application)
 
 
