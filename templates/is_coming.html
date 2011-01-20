@@ -1,8 +1,8 @@
-<html>
-<head>
-<title>Can you join us?</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Can you join us?{% endblock %}
+
+{% block content %}
 <p>Welcome, {{ name }}!</p>
 <p>Will one or more people from your invitation be joining us?
   <form action="/yesorno" method="post">
@@ -13,5 +13,4 @@
     <div><input type="submit" value="OK"></div>
   </form>
 </p>
-</body>
-</html>
+{% endblock %}
