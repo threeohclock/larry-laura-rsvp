@@ -5,7 +5,7 @@
 
 {% block ExtraJavascript %}
 function ShowHideTextFields() {
-  var people = parseInt($('input:radio[name=radio]:checked').val());
+  var people = parseInt($('input:radio[name=coming]:checked').val());
   if (!people) { return; }
   for (i=1;i<=people;i++) {
     $( "#namebox" + i ).show("fast");
@@ -14,11 +14,13 @@ function ShowHideTextFields() {
   for (i=nopeople;i<=8;i++) {
     $( "#namebox" + i ).hide("fast");
   };
+  $( "#partysubmit" ).attr("disabled", false);
 };
 function SetButtons() {
-  $( "#radio" ).buttonset();
-  $( "#radio" ).change(ShowHideTextFields);
   {% if size %}$( "#radio{{ size }}" ).attr("checked", "checked");{% endif %}
+  $( "#radio" ).buttonset();
+  $( "#partysubmit" ).attr("disabled", 'disabled');
+  $( "#radio" ).change(ShowHideTextFields);
 };
 
 {% endblock %}
@@ -32,45 +34,23 @@ function SetButtons() {
 {% block content %}
 <p>How many in your party, and your names, please?
 
-
     <form action="/partydetail" id="partydetail_form" method="post">
-
     <div id="radio">
-      <input type="radio" id="radio1" value="1" name="radio" /><label for="radio1">One</label>
-      <input type="radio" id="radio2" value="2" name="radio" /><label for="radio2">Two</label>
-      <input type="radio" id="radio3" value="3" name="radio" /><label for="radio3">Three</label>
-      <input type="radio" id="radio4" value="4" name="radio" /><label for="radio4">Four</label>
-      <input type="radio" id="radio5" value="5" name="radio" /><label for="radio5">Five</label>
-      <input type="radio" id="radio6" value="6" name="radio" /><label for="radio6">Six</label>
-      <input type="radio" id="radio7" value="7" name="radio" /><label for="radio7">Seven</label>
-      <input type="radio" id="radio8" value="8" name="radio" /><label for="radio8">Eight</label>
+      {% for i in 1to8 %}
+        <input type="radio" id="radio{{ forloop.counter }}" value="{{ forloop.counter }}" name="coming" />
+        <label for="radio{{ forloop.counter }}">{{ forloop.counter|apnumber|capfirst }}</label>
+      {% endfor %}
     </div>
     <div id="nameboxes">
-     <div class="namebox_container" id="namebox1">
-       <label for='name1' class="nameboxlabel">First person</label><input type="text" name="name1" class="namebox" /><br />
-     </div>
-     <div class="namebox_container" id="namebox2">
-       <label for='name2' class="nameboxlabel">Second person</label><input type="text" name="name2" class="namebox" /><br />
-     </div>
-     <div class="namebox_container" id="namebox3">
-       <label for='name3' class="nameboxlabel">Third person</label><input type="text" name="name3" class="namebox" /><br />
-     </div>
-     <div class="namebox_container" id="namebox4">
-       <label for='name4' class="nameboxlabel">Fourth person</label><input type="text" name="name4" class="namebox" /><br />
-     </div>
-     <div class="namebox_container" id="namebox5">
-       <label for='name5' class="nameboxlabel">Fifth person</label><input type="text" name="name5" class="namebox" /><br />
-     </div>
-     <div class="namebox_container" id="namebox6">
-       <label for='name6' class="nameboxlabel">Sixth person</label><input type="text" name="name6" class="namebox" /><br />
-     </div>
-     <div class="namebox_container" id="namebox7">
-       <label for='name7' class="nameboxlabel">Seventh person</label><input type="text" name="name7" class="namebox" /><br />
-     </div>
-     <div class="namebox_container" id="namebox8">
-       <label for='name8' class="nameboxlabel">Eighth person</label><input type="text" name="name8" class="namebox" /><br />
-     </div>
+      {% for i in 1to8 %}
+        <div class="namebox_container" id="namebox{{ forloop.counter }}">
+          <label for='name{{ forloop.counter }}' class="nameboxlabel">{{ i.0 }} guest</label>
+          <input type="text" name="name{{ forloop.counter }}" class="namebox"
+          {% if i.1 %}value="{{ i.1 }}"{% endif %}/><br />
+        </div>
+      {% endfor %}
     </div>
+    <input id="partysubmit" type="submit" />
   </form>
 </p>
 {% endblock %}
