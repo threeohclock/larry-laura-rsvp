@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Can you join us?{% endblock %}
+{% block progress %}40{% endblock %}
+
+{% block ExtraJavascript %}
+function ShowHideTextFields() {
+  var people = $('input:radio[name=radio]:checked').val();
+  if (!people) { return; }
+  for (i=1;i<=people;i++) {
+    var personfield = "name" + i;
+    $( "#partydetail_form" ).append('<label for=' + personfield + '>Person ' + i + '</label><input type="text" name="' + personfield + '" size="25" /><br />');
+  }
+};
+function SetButtons() {
+  $( "#radio" ).buttonset();
+  $( "#radio" ).change(ShowHideTextFields);
+  {% if size %}$( "#radio{{ size }}" ).attr("checked", "checked");{% endif %}
+};
+
+{% endblock %}
+
+{% block OnLoad %}
+{{ block.super }}
+  SetButtons();
+  ShowHideTextFields();
+{% endblock %}
+
+{% block content %}
+<p>How many in your party, and your names, please?
+
+
+    <form action="/partydetail" id="partydetail_form" method="post">
+
+    <div id="radio">
+      <input type="radio" id="radio1" value="1" name="radio" /><label for="radio1">One</label>
+      <input type="radio" id="radio2" value="2" name="radio" /><label for="radio2">Two</label>
+      <input type="radio" id="radio3" value="3" name="radio" /><label for="radio3">Three</label>
+      <input type="radio" id="radio4" value="4" name="radio" /><label for="radio4">Four</label>
+      <input type="radio" id="radio5" value="5" name="radio" /><label for="radio5">Five</label>
+      <input type="radio" id="radio6" value="6" name="radio" /><label for="radio6">Six</label>
+      <input type="radio" id="radio7" value="7" name="radio" /><label for="radio7">Seven</label>
+      <input type="radio" id="radio8" value="8" name="radio" /><label for="radio8">Eight</label>
+    </div>
+    <div id="nameboxes">
+
+    </div>
+  </form>
+</p>
+{% endblock %}
