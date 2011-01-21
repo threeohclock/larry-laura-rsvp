@@ -113,7 +113,7 @@ class YesOrNo(RequestHandler):
     if coming == 'no':
       party.is_coming = False
       party.put()
-      self.DEBUG('Sorry, we will miss you!')
+      self.WriteTemplate('notcoming.html', {})
       return
     if coming == 'yes':
       party.is_coming = True
