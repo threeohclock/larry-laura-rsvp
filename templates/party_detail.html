@@ -5,12 +5,15 @@
 
 {% block ExtraJavascript %}
 function ShowHideTextFields() {
-  var people = $('input:radio[name=radio]:checked').val();
+  var people = parseInt($('input:radio[name=radio]:checked').val());
   if (!people) { return; }
   for (i=1;i<=people;i++) {
-    var personfield = "name" + i;
-    $( "#partydetail_form" ).append('<label for=' + personfield + '>Person ' + i + '</label><input type="text" name="' + personfield + '" size="25" /><br />');
-  }
+    $( "#namebox" + i ).show("fast");
+  };
+  var nopeople = 1 + people;
+  for (i=nopeople;i<=8;i++) {
+    $( "#namebox" + i ).hide("fast");
+  };
 };
 function SetButtons() {
   $( "#radio" ).buttonset();
@@ -43,7 +46,30 @@ function SetButtons() {
       <input type="radio" id="radio8" value="8" name="radio" /><label for="radio8">Eight</label>
     </div>
     <div id="nameboxes">
-
+     <div class="namebox_container" id="namebox1">
+       <label for='name1' class="nameboxlabel">First person</label><input type="text" name="name1" class="namebox" /><br />
+     </div>
+     <div class="namebox_container" id="namebox2">
+       <label for='name2' class="nameboxlabel">Second person</label><input type="text" name="name2" class="namebox" /><br />
+     </div>
+     <div class="namebox_container" id="namebox3">
+       <label for='name3' class="nameboxlabel">Third person</label><input type="text" name="name3" class="namebox" /><br />
+     </div>
+     <div class="namebox_container" id="namebox4">
+       <label for='name4' class="nameboxlabel">Fourth person</label><input type="text" name="name4" class="namebox" /><br />
+     </div>
+     <div class="namebox_container" id="namebox5">
+       <label for='name5' class="nameboxlabel">Fifth person</label><input type="text" name="name5" class="namebox" /><br />
+     </div>
+     <div class="namebox_container" id="namebox6">
+       <label for='name6' class="nameboxlabel">Sixth person</label><input type="text" name="name6" class="namebox" /><br />
+     </div>
+     <div class="namebox_container" id="namebox7">
+       <label for='name7' class="nameboxlabel">Seventh person</label><input type="text" name="name7" class="namebox" /><br />
+     </div>
+     <div class="namebox_container" id="namebox8">
+       <label for='name8' class="nameboxlabel">Eighth person</label><input type="text" name="name8" class="namebox" /><br />
+     </div>
     </div>
   </form>
 </p>
