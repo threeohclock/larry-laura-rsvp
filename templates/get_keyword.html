@@ -2,11 +2,9 @@
 
 {% block title %}Secret Word, Please?{% endblock %}
 
-{% block content %}
-{% if error %}
-<p><font color="red"><b>ERROR</b>: {{ error }}</font></p>
-{% endif %}
+{% block progress %}5{% endblock %}
 
+{% block content %}
 <p>Please enter your secret word from your email or paper invitation:
   <form action="/secretword" method="post">
     <div>

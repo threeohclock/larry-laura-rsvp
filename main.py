@@ -39,8 +39,9 @@ class RequestHandler(webapp.RequestHandler):
       return
     self.response.out.write('DEBUG: ' + msg + '<br />')
 
-  def ERROR(self, msg, filename='error.html'):
-    self.WriteTemplate(filename, {'error': msg})
+  def ERROR(self, msg, filename='error.html', template_vars={}):
+    template_vars['errormessage'] = msg
+    self.WriteTemplate(filename, template_vars)
 
 def GetSession():
   return sessions.Session(writer="cookie")
@@ -81,15 +82,15 @@ class SecretWord(RequestHandler):
 
   def HandleSecretWord(self, secret_word):
     if not secret_word:
-      self.ERROR('Secret word cannot be blank!', 'get_keyword.html')
+      self.ERROR('Your secret word cannot be blank!', 'get_keyword.html')
       return
     parties = db.GqlQuery("SELECT * FROM Party WHERE secret = :1 LIMIT 2", secret_word)
     matched = parties.count()
     if matched > 1:
-      self.ERROR('Got more than one wedding party matched against secret word: %s' % [p.name for p in parties])
+      self.ERROR('Got more than one wedding party matched for the secret word %s: %s' % (secret_word, [p.name for p in parties]))
       return
     if not matched:
-      self.ERROR('No parties with that secret word found.', 'get_keyword.html')
+      self.ERROR('Sorry, that does not appear to be a valid secret word.  Please try again.', 'get_keyword.html')
       return    
     party = parties.get()
     sess = GetSession()
@@ -117,9 +118,29 @@ class YesOrNo(RequestHandler):
     if coming == 'yes':
       party.is_coming = True
       party.put()
+      template_vars = {'size': party.size, 'names': party.people_names}
+      self.WriteTemplate('party_detail.html', template_vars)
+      return
+    self.ERROR('Please select either yes or no!', 'is_coming.html', {'name': party.name})
+
+class PartyDetails(RequestHandler):      
+   def post(self):
+    """Get count of guests and guest names."""
+    count = self.request.get('count')
+    self.DEBUG('count: "%s"' % count)
+    party = GetUserFromSession()
+    if coming == 'no':
+      party.is_coming = False
+      party.put()
+      self.DEBUG('Sorry, we will miss you!')
+      return
+    if coming == 'yes':
+      party.is_coming = True
+      party.put()
       self.DEBUG('Hooray!  See you there!')
       return
-    self.DEBUG('coming was not yes or no!')
+    self.ERROR('Please select either yes or no!', 'is_coming.html', {'name': party.name})
+ 
     
 
 def main():
