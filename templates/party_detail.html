@@ -21,8 +21,19 @@ function SetButtons() {
   $( "#radio" ).buttonset();
   $( "#partysubmit" ).attr("disabled", 'disabled');
   $( "#radio" ).change(ShowHideTextFields);
+  };
+function ShowError(message) {
 };
-
+$('#partydetail_form').submit(function() {
+    var people = parseInt($('input:radio[name=coming]:checked').val());
+    for (i=1;i<=people;i++) {
+      person = $('input[name="name'+i+'"]').val();
+      if (!person) {
+        ShowError("Please don't leave any name fields blank!");
+        return false;
+      }
+    };
+});
 {% endblock %}
 
 {% block OnLoad %}
