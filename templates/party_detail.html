@@ -21,19 +21,24 @@ function SetButtons() {
   $( "#radio" ).buttonset();
   $( "#partysubmit" ).attr("disabled", 'disabled');
   $( "#radio" ).change(ShowHideTextFields);
-  };
-function ShowError(message) {
+  $( '#partydetail_form' ).submit(ValidateForm);
 };
-$('#partydetail_form').submit(function() {
+function ValidateForm() {
     var people = parseInt($('input:radio[name=coming]:checked').val());
+    var name_array = new Array();
     for (i=1;i<=people;i++) {
       person = $('input[name="name'+i+'"]').val();
+      name_array.push($.trim(person.toLowerCase()));
       if (!person) {
         ShowError("Please don't leave any name fields blank!");
         return false;
       }
-    };
-});
+    }
+    if (name_array.length != $.unique(name_array).length) {
+      ShowError("Please do not enter the same name more than once!");
+      return false;
+    }
+}; 
 {% endblock %}
 
 {% block OnLoad %}

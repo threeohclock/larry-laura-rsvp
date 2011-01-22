@@ -143,7 +143,7 @@ class PartyDetails(RequestHandler):
     """Get count of guests and guest names."""
     party = GetUserFromSession()
     party.size = int(self.request.get('coming'))
-    names = [self.request.get('name%s' % n) for n in range(1, party.size+1)]
+    names = [self.request.get('name%s' % n).strip() for n in range(1, party.size+1)]
     party.people_names = names
     party.put()
 
