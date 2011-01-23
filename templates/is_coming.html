@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Can you join us?{% endblock %}
+{% block progress %}20{% endblock %}
+
+{% block ExtraJavascript %}
+function SetButtons() {
+  $( "#yesbutton" ).click(function() { $('input[name="coming"]').val("yes") ; $('#yesno').submit(); });
+  $( "#nobutton" ).click(function() { $('input[name="coming"]').val("no") ; $('#yesno').submit(); });
+};
+{% endblock %}
+
+{% block OnLoad %}
+{{ block.super }}
+  SetButtons();
+{% endblock %}
+
+{% block content %}
+<p>Welcome, {{ name }}!</p>
+<p>Will one or more people from your invitation be joining us?
+
+  {% if coming or not_coming %}
+    <div class="ui-widget rsvpalert">
+      <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
+        <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+      Our current status shows that you <strong>ARE{% if not_coming %} NOT{% endif %}</strong> coming.  You can update your status using the buttons below.</p>
+      </div>
+    </div>
+  {% endif %}
+
+  <form action="/yesorno" id="yesno" method="post">
+    <button id="yesbutton">We'll be there!</button>
+    <button id="nobutton">Sorry, we can't make it.</button>
+    <input type="hidden" name="coming" />
+  </form>
+</p>
+{% endblock %}

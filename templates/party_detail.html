@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Who is coming?{% endblock %}
+{% block progress %}40{% endblock %}
+
+{% block ExtraJavascript %}
+function ShowHideTextFields() {
+  var people = parseInt($('input:radio[name=coming]:checked').val());
+  if (!people) { return; }
+  for (i=1;i<=people;i++) {
+    $( "#namebox" + i ).show("fast");
+  };
+  var nopeople = 1 + people;
+  for (i=nopeople;i<=8;i++) {
+    $( "#namebox" + i ).hide("fast");
+  };
+  $( "#partysubmit" ).attr("disabled", false);
+};
+function SetButtons() {
+  {% if size %}$( "#radio{{ size }}" ).attr("checked", "checked");{% endif %}
+  $( "#radio" ).buttonset();
+  $( "#partysubmit" ).attr("disabled", 'disabled');
+  $( "#radio" ).change(ShowHideTextFields);
+  $( '#partydetail_form' ).submit(ValidateForm);
+};
+function ValidateForm() {
+    var people = parseInt($('input:radio[name=coming]:checked').val());
+    var name_array = new Array();
+    for (i=1;i<=people;i++) {
+      person = $('input[name="name'+i+'"]').val();
+      name_array.push($.trim(person.toLowerCase()));
+      if (!person) {
+        ShowError("Please don't leave any name fields blank!");
+        return false;
+      }
+    }
+    if (name_array.length != $.unique(name_array).length) {
+      ShowError("Please do not enter the same name more than once!");
+      return false;
+    }
+}; 
+{% endblock %}
+
+{% block OnLoad %}
+{{ block.super }}
+  SetButtons();
+  ShowHideTextFields();
+{% endblock %}
+
+{% block content %}
+<p>How many in your party, and your names, please?
+
+    <form action="/partydetail" id="partydetail_form" method="post">
+    <div id="radio">
+      {% for i in 1to8 %}
+        <input type="radio" id="radio{{ forloop.counter }}" value="{{ forloop.counter }}" name="coming" />
+        <label for="radio{{ forloop.counter }}">{{ forloop.counter|apnumber|capfirst }}</label>
+      {% endfor %}
+    </div>
+    <div id="nameboxes">
+      {% for i in 1to8 %}
+        <div class="namebox_container" id="namebox{{ forloop.counter }}">
+          <label for='name{{ forloop.counter }}' class="nameboxlabel">{{ i.0 }} guest</label>
+          <input type="text" name="name{{ forloop.counter }}" class="namebox"
+          {% if i.1 %}value="{{ i.1 }}"{% endif %}/><br />
+        </div>
+      {% endfor %}
+    </div>
+    <input id="partysubmit" type="submit" />
+  </form>
+</p>
+{% endblock %}
