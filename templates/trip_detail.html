@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Please fill us in on your trip details{% endblock %}
+{% block progress %}60{% endblock %}
+
+{% block ExtraHeaders %}
+<script src="/js/combobox.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block ExtraJavascript %}
+function SetButtons() {
+  {% if size %}$( "#radio{{ size }}" ).attr("checked", "checked");{% endif %}
+  $( "#hotelname" ).combobox();
+  // $( "#tripsubmit" ).attr("disabled", 'disabled');
+  $( '#tripdetail_form' ).submit(ValidateForm);
+};
+
+function ValidateForm() {
+  // check no empty dates
+  // check that dates do not match
+  // room number or hotel name exist
+  // room number is 1-23
+}; 
+
+//  $( "#tripsubmit" ).attr("disabled", false);
+
+function SetDatePickers() {
+  var default_arrival = new Date(2011, 10, 10);
+  var default_departure = new Date(2011, 10, 13);
+  var dates = $( "#arrivaldate, #departuredate" ).datepicker({
+    defaultDate: default_arrival,
+    numberOfMonths: 1,
+    onSelect: function( selectedDate ) {
+      var option = this.id == "arrivaldate" ? "minDate" : "maxDate",
+      instance = $( this ).data( "datepicker" );
+      date = $.datepicker.parseDate(
+        instance.settings.dateFormat ||
+        $.datepicker._defaults.dateFormat,
+        selectedDate, instance.settings );
+      dates.not( this ).datepicker( "option", option, date );
+    }
+  });
+  // Fix the default date for the departure
+  $( "#departuredate" ).datepicker( "option", "defaultDate", default_departure );
+};
+
+
+{% endblock %}
+
+{% block OnLoad %}
+{{ block.super }}
+  CreateComboboxWidget(jQuery);
+  SetButtons();
+  SetDatePickers();
+{% endblock %}
+
+{% block content %}
+<p>Please tell us some details about your trip.
+  <form action="/tripdetail" id="tripdetail_form" method="post">
+    <div id="datefields">
+      <label for="from">Arriving in Tulum:</label>
+      <input type="text" id="arrivaldate" name="from"
+        {% if arrival %}value="{{ arrival }}"{% endif %}/>
+      <label for="to">Departing Tulum:</label>
+      <input type="text" id="departuredate" name="to"
+        {% if departure %}value="{{ departure }}"{% endif %}/>
+    </div>
+    <div id="hotelfields">
+      Your <a href="http://www.larryandlaura.us/ana-y-jose" target="_blank">Ana y José </a> room number and name
+      <select id="roomnumber" name="roomnumber">
+        {% if not roomnumber %}<option selected></option>{% endif %}
+        <option value="0">We are staying elsewhere</option>
+        <option value="1">1  - Amanecer</option>
+        <option value="2">2  - Brisa del Mar</option>
+        <option value="3">3  - Nube</option>
+        <option value="4">4  - Lluvia</option>
+        <option value="5">5  - Sol</option>
+        <option value="6">6  - Luna</option>
+        <option value="7">7  - Tulum</option>
+        <option value="8">8  - Palmera</option>
+        <option value="9">9  - Caracol</option>
+        <option value="10">10 - Coral</option>
+        <option value="11">11 - Sian Ka'an</option>
+        <option value="12">12 - Ana</option>
+        <option value="13">13 - Atardecer</option>
+        <option value="14">14 - Jose</option>
+        <option value="15">15 - Carpinteria</option>
+        <option value="16">16 - Casa de Patron</option>
+        <option value="17">17 - Estrella del Mar</option>
+        <option value="18">18 - Agua de Mar</option>
+        <option value="19">19 - Encantada</option>
+        <option value="20">20 - Capricho</option>
+        <option value="22">22 - Arena</option>
+        <option value="23">23 - Coba Villa</option>
+      </select>
+      <div id="hotelnameinputs">
+      <select id="hotelname" name="hotelname">
+      <option selected></option>
+        
+      <option value="Akumal Beach">Akumal Beach</option><option value="Akumal Caribe">Akumal Caribe</option><option value="Amasala">Amasala</option><option value="Ana y Jose">Ana y Jose</option><option value="Aqua">Aqua</option><option value="Aquamarina Beach">Aquamarina Beach</option><option value="Avalon Bacaraa">Avalon Bacaraa</option><option value="Avalon Grand">Avalon Grand</option><option value="Aventura Palace & Cave">Aventura Palace & Cave</option><option value="Azcar">Azcar</option><option value="Azul Beach">Azul Beach</option><option value="Azul Sensatori">Azul Sensatori</option><option value="Azulik">Azulik</option><option value="Barcelo Costa">Barcelo Costa</option><option value="Barcelo Maya">Barcelo Maya</option><option value="Barcelo Tucancun">Barcelo Tucancun</option><option value="Be Tulum">Be Tulum</option><option value="Beach Escape Kin-Ha">Beach Escape Kin-Ha</option><option value="Beach Palace">Beach Palace</option><option value="Beach Paradise Hotetur">Beach Paradise Hotetur</option><option value="Blue">Blue</option><option value="Blue Bay G. Esmeralda">Blue Bay G. Esmeralda</option><option value="Cabanas Copal">Cabanas Copal</option><option value="Cabanas La Luna">Cabanas La Luna</option><option value="Cabanas Tulum/La Bistro">Cabanas Tulum/La Bistro</option><option value="Calypso">Calypso</option><option value="Cancun Caribe Park">Cancun Caribe Park</option><option value="Cancun Center">Cancun Center</option><option value="Cancun Clipper Club">Cancun Clipper Club</option><option value="Cancun Palace">Cancun Palace</option><option value="Cancun Plaza">Cancun Plaza</option><option value="Caribbean Princess">Caribbean Princess</option><option value="Casa Maya">Casa Maya</option><option value="Casa Violeta">Casa Violeta</option><option value="Casa de Miel">Casa de Miel</option><option value="Catalonia Maroma">Catalonia Maroma</option><option value="Catalonia Riviera Maya">Catalonia Riviera Maya</option><option value="Catalonia Royal">Catalonia Royal</option><option value="Ceiba del Mar">Ceiba del Mar</option><option value="Club Regina">Club Regina</option><option value="Club Tulum">Club Tulum</option><option value="Coco Ecochic Hotel">Coco Ecochic Hotel</option><option value="Crown Paradise Club">Crown Paradise Club</option><option value="Desire Resort">Desire Resort</option><option value="Diamante K">Diamante K</option><option value="Don Diego de la Playa">Don Diego de la Playa</option><option value="Dos Ceibas">Dos Ceibas</option><option value="Dos Playas">Dos Playas</option><option value="Dreams">Dreams</option><option value="Dreams Cancun">Dreams Cancun</option><option value="Dreams Tulum">Dreams Tulum</option><option value="El Cid Marina">El Cid Marina</option><option value="El Dorado Maroma">El Dorado Maroma</option><option value="El Dorado Royale">El Dorado Royale</option><option value="El Dorado Sea Side">El Dorado Sea Side</option><option value="El Embarcadero">El Embarcadero</option><option value="El Paraiso">El Paraiso</option><option value="El Pueblito">El Pueblito</option><option value="Elan">Elan</option><option value="Esmeralda K">Esmeralda K</option><option value="Excellence Riviera">Excellence Riviera</option><option value="Fiesta Americana Club">Fiesta Americana Club</option><option value="Fiesta Americana Condesa">Fiesta Americana Condesa</option><option value="Fiesta Americana Coral Beach">Fiesta Americana Coral Beach</option><option value="Flamingo Cancun">Flamingo Cancun</option><option value="GR Solaris">GR Solaris</option><option value="Golden Parnassus">Golden Parnassus</option><option value="Gran Bahia Principe">Gran Bahia Principe</option><option value="Grand Caribe Real">Grand Caribe Real</option><option value="Grand Melia Cancun">Grand Melia Cancun</option><option value="Grand Oasis Cancun">Grand Oasis Cancun</option><option value="Grand Oasis Playa">Grand Oasis Playa</option><option value="Grand Oasis Riviera Maya">Grand Oasis Riviera Maya</option><option value="Grand Palladium">Grand Palladium</option><option value="Grand Velas">Grand Velas</option><option value="Great Parnassus">Great Parnassus</option><option value="H10 Ocean Coral">H10 Ocean Coral</option><option value="Hamaca Loca">Hamaca Loca</option><option value="Hemmingway">Hemmingway</option><option value="Hilton Cancun">Hilton Cancun</option><option value="Holiday Inn C. Arenas">Holiday Inn C. Arenas</option><option value="Holiday Inn Express">Holiday Inn Express</option><option value="Hotel Crucero">Hotel Crucero</option><option value="Hyatt">Hyatt</option><option value="Iberostar Paraiso">Iberostar Paraiso</option><option value="Imperial Las Perlas">Imperial Las Perlas</option><option value="JW Marriott">JW Marriott</option><option value="La Nueva Vida de Ramiro">La Nueva Vida de Ramiro</option><option value="La Vita Bella">La Vita Bella</option><option value="La Zebra">La Zebra</option><option value="Laguan Suites">Laguan Suites</option><option value="Las Casitas">Las Casitas</option><option value="Las Ranitas">Las Ranitas</option><option value="Le Blanc">Le Blanc</option><option value="Le Meridien">Le Meridien</option><option value="Los Arrecifes">Los Arrecifes</option><option value="Los Lirios">Los Lirios</option><option value="Luna Maya">Luna Maya</option><option value="ME By Melia">ME By Melia</option><option value="Mandarin Oriental">Mandarin Oriental</option><option value="Marriott Casa Magna">Marriott Casa Magna</option><option value="Maya Caribe">Maya Caribe</option><option value="Maya Tanka">Maya Tanka</option><option value="Maya Tulum">Maya Tulum</option><option value="Mayakoba">Mayakoba</option><option value="Mezzanine">Mezzanine</option><option value="Mil amores">Mil amores</option><option value="Mirador">Mirador</option><option value="Moon & Sunrise Palace">Moon & Sunrise Palace</option><option value="NH Crystal">NH Crystal</option><option value="NH Riviera">NH Riviera</option><option value="Oasis Cancun">Oasis Cancun</option><option value="Oasis Palm Beach">Oasis Palm Beach</option><option value="Oasis Viva Beach">Oasis Viva Beach</option><option value="Occidental Grand Xcaret">Occidental Grand Xcaret</option><option value="Ocean H10">Ocean H10</option><option value="Ocean Hotel">Ocean Hotel</option><option value="Ocho Tulum">Ocho Tulum</option><option value="Om">Om</option><option value="Omni">Omni</option><option value="Omni Hotel Cancun & Villas">Omni Hotel Cancun & Villas</option><option value="Papaya Playa">Papaya Playa</option><option value="Paradisus Riviera">Paradisus Riviera</option><option value="Paraiso de la Bonita">Paraiso de la Bonita</option><option value="Parayso">Parayso</option><option value="Park Royal">Park Royal</option><option value="Piedra Escondida">Piedra Escondida</option><option value="Playa Azul">Playa Azul</option><option value="Playa Kin Ha">Playa Kin Ha</option><option value="Playa Mambo">Playa Mambo</option><option value="Posada Lamar">Posada Lamar</option> <option value="Posada Luna del Sur">Posada Luna del Sur</option><option value="Posada Margarita">Posada Margarita</option><option value="Posada del Sol">Posada del Sol</option><option value="Presidente Inter Continental">Presidente Inter Continental</option><option value="Princess">Princess</option><option value="Puerta del Cierlo">Puerta del Cierlo</option><option value="Punta Piedra">Punta Piedra</option><option value="Q Bay">Q Bay</option><option value="Retiro Maya">Retiro Maya</option><option value="Riu Cancun">Riu Cancun</option><option value="Riu Caribe">Riu Caribe</option><option value="Riu Palace">Riu Palace</option><option value="Royal Playa Del Carmen">Royal Playa Del Carmen</option><option value="Royal Solaris">Royal Solaris</option><option value="Royal Solaris Cancun">Royal Solaris Cancun</option><option value="S & S Hip Hotel">S & S Hip Hotel</option><option value="Salvia">Salvia</option><option value="Sandos Caracol">Sandos Caracol</option><option value="Secrets Capri">Secrets Capri</option><option value="Secrets Maroma">Secrets Maroma</option><option value="Secrets Silversands">Secrets Silversands</option><option value="Suenos Tulum">Suenos Tulum</option><option value="Shambala">Shambala</option><option value="Sirenis">Sirenis</option><option value="Solymar">Solymar</option><option value="Sun Palace">Sun Palace</option><option value="Sunset">Sunset</option><option value="Sunset Lagoon">Sunset Lagoon</option><option value="Temptation">Temptation</option><option value="The Bell Air Collection">The Bell Air Collection</option><option value="The Grand Mayan Palace">The Grand Mayan Palace</option><option value="The Ritz Carlton">The Ritz Carlton</option><option value="The Royal Cancun">The Royal Cancun</option><option value="The Royal Caribbean">The Royal Caribbean</option><option value="The Royal Islander">The Royal Islander</option><option value="The Royal Mayan">The Royal Mayan</option><option value="The Royal Sands">The Royal Sands</option><option value="The Westin">The Westin</option><option value="The Westin Lagunamar">The Westin Lagunamar</option><option value="Tierra del Sol">Tierra del Sol</option><option value="Tita Tulum">Tita Tulum</option><option value="Tres Rios">Tres Rios</option><option value="Valentin Maya">Valentin Maya</option><option value="Via Lactea">Via Lactea</option><option value="Villa Derosa">Villa Derosa</option><option value="Villas Akumal">Villas Akumal</option><option value="Villas Maya">Villas Maya</option><option value="Weary Traveler">Weary Traveler</option><option value="Xcanan">Xcanan</option><option value="Xi-Xho">Xi-Xho</option><option value="Xpu-Ha Palace">Xpu-Ha Palace</option><option value="Zamas">Zamas</option><option value="Zazil Kin">Zazil Kin</option><option value="Zulum">Zulum</option>
+      </select>
+      </div>
+
+    </div>
+   <input id="tripsubmit" type="submit" />
+  </form>
+</p>
+{% endblock %}
