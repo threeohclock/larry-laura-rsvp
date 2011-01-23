@@ -8,6 +8,7 @@ from google.appengine.ext.webapp import util
 from google.appengine.ext.webapp import template
 from appengine_utilities import sessions
 
+
 template.register_template_library('django.contrib.humanize.templatetags.humanize')
 
 DEBUGGING = False
