@@ -1,9 +1,0 @@
-
---This line, and those below, will be ignored--
-
-M    app.yaml
-M    main.py
-M    templates/get_keyword.html
-M    templates/is_coming.html
-M    templates/error.html
-M    templates/base.html
