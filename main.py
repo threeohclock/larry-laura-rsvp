@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from datetime import datetime
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
@@ -9,9 +10,12 @@ from appengine_utilities import sessions
 
 template.register_template_library('django.contrib.humanize.templatetags.humanize')
 
-DEBUGGING = True
+DEBUGGING = False
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 ORDINALS = ('First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth')
+
+JQUERY_DATE_FORMAT = '%m/%d/%Y'
+JsDate = lambda pydate: pydate.strftime(JQUERY_DATE_FORMAT)
 
 class Party(db.Model):
   name = db.StringProperty(required=True)
@@ -32,7 +36,6 @@ class Party(db.Model):
   notes = db.TextProperty()
   date = db.DateTimeProperty(auto_now_add=True)
 
-
 class RequestHandler(webapp.RequestHandler):
   def WriteTemplate(self, filename, kwargs):
     self.response.out.write(template.render(os.path.join(TEMPLATE_DIR, filename), kwargs))
@@ -46,6 +49,12 @@ class RequestHandler(webapp.RequestHandler):
     template_vars['errormessage'] = msg
     self.WriteTemplate(filename, template_vars)
 
+  def NAVERROR(self):
+    self.WriteTemplate('get_keyword.html', {'errormessage': 'Sorry, browsing directly to that page is not supported.  Please re-enter your secret word.'})
+
+  def get(self):
+    self.NAVERROR()
+
 def GetSession():
   return sessions.Session(writer="cookie")
 
@@ -53,7 +62,7 @@ def GetUserFromSession():
   sess = GetSession()
   party = Party.get_by_id(sess['party_key_id'])
   if not party:
-    self.ERROR('Failure trying to look up your account from your session.')
+    self.ERROR('Failure trying to look up your account from your session, please re-enter your secret word', 'get_keyword.html')
   return party
 
 class PopulateTestData(RequestHandler):
@@ -139,39 +148,71 @@ class YesOrNo(RequestHandler):
     self.ERROR('Please select either yes or no!', 'is_coming.html', {'name': party.name})
 
 class PartyDetails(RequestHandler):
-   def post(self):
+  def post(self):
     """Get count of guests and guest names."""
     party = GetUserFromSession()
     party.size = int(self.request.get('coming'))
     names = [self.request.get('name%s' % n).strip() for n in range(1, party.size+1)]
     party.people_names = names
     party.put()
-
     self.DEBUG('Coming count: "%s"<br>Names are: %s' % (party.size, party.people_names))
-    return
-    # DISCARDABLE AFTER THIS LINE TO END OF FUNCTION
-    if coming == 'no':
-      party.is_coming = False
-      party.put()
-      self.DEBUG('Sorry, we will miss you!')
-      return
-    if coming == 'yes':
-      party.is_coming = True
-      party.put()
-      self.DEBUG('Hooray!  See you there!')
-      return
-    self.ERROR('Please select either yes or no!', 'is_coming.html', {'name': party.name})
+    template_vars = {'room': party.room_number, 'hotel': party.hotel_name}
+    if party.arrival_date and party.departure_date:
+      template_vars['arrival'] = JsDate(party.arrival_date)
+      template_vars['departure'] = JsDate(party.departure_date)
+    self.WriteTemplate('trip_detail.html', template_vars)
 
+class TripDetails(RequestHandler):
+  def post(self):
+    """Get count of guests and guest names."""
+    party = GetUserFromSession()
+    room = self.request.get('roomnumber')
+    hotel = self.request.get('hotelname')
+    try:
+      party.arrival_date = datetime.strptime(self.request.get('from'), JQUERY_DATE_FORMAT).date()
+      party.departure_date = datetime.strptime(self.request.get('to'), JQUERY_DATE_FORMAT).date()
+    except:
+      template_vars = {'room': room, 'hotel': hotel}
+      if party.arrival_date:
+        template_vars['arrival'] = JsDate(party.arrival_date)
+      if party.departure_date:
+        template_vars['departure'] = JsDate(party.departure_date)
+      self.DEBUG('Template vars: %s' % template_vars)
+      self.ERROR('Sorry, I didn\'t understand those arrival and departure dates.  Please use the selection widgets, or enter them in a MM/DD/YYYY format.', 'trip_detail.html', template_vars)
+      return
+
+    if party.arrival_date > party.departure_date:
+      template_vars = {'room': room, 'hotel': hotel}
+      self.ERROR('The departure date (%s) cannot be before the arrival date (%s)!' % (JsDate(party.departure_date), JsDate(party.arrival_date)), 'trip_detail.html', template_vars)
+      return
+
+    if room:
+      party.room_number = int(room)
+      party.hotel_name = None
+    elif hotel:
+      party.room_number = None
+      party.hotel_name =  hotel
+    else:
+      template_vars = {'room': party.room_number, 'hotel': party.hotel_name}
+      if party.arrival_date and party.departure_date:
+        template_vars['arrival'] = JsDate(party.arrival_date)
+        template_vars['departure'] = JsDate(party.departure_date)
+      self.ERROR('Please select a room at Ana y Jose, type in a different hotel, or select one from the list.', 'trip_detail.html', template_vars)
+      return
+    # party.put()
+    self.DEBUG('Arrival date: %s<br>Departure date: %s<br>Room number: %s<br>Hotel name: %s' % (party.arrival_date, party.departure_date, party.room_number, party.hotel_name))
+ 
 
 def main():
-    application = webapp.WSGIApplication([('/', LandingWithoutKeyword),
-                                          ('/test', PopulateTestData),
-                                          ('/secretword', SecretWord),
-                                          ('/yesorno', YesOrNo),
-                                          ('/partydetail', PartyDetails),
-                                          ('/.{1,10}', SecretWord)],
-                                         debug=DEBUGGING)
-    util.run_wsgi_app(application)
+   application = webapp.WSGIApplication([('/', LandingWithoutKeyword),
+                                         ('/test', PopulateTestData),
+                                         ('/secretword', SecretWord),
+                                         ('/yesorno', YesOrNo),
+                                         ('/partydetail', PartyDetails),
+                                         ('/tripdetail', TripDetails),
+                                         ('/.{1,10}', SecretWord)],
+                                        debug=DEBUGGING)
+   util.run_wsgi_app(application)
 
 
 if __name__ == '__main__':
