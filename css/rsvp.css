@@ -1,0 +1,77 @@
+body{}
+
+#progressbar {
+  width: 70%;
+  text-align: center;
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#content {
+  text-align: center;
+}
+#errormessage {
+}
+#errortext {
+}
+#yesnoform {
+  text-align: left;
+}
+#nameboxes {
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+#roomnumber {
+  margin-bottom: 30px;
+}
+#hotelfields {
+  margin-top: 30px;
+}
+#hotelnamediv {
+  margin-top: 40px;
+  padding: 30px;
+}
+#hotelname {
+  margin-top: 40px;
+}
+.rsvpalert {
+  margin-top: 30px;
+  margin-bottom: 15px;
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.namebox_container {
+  display: none;
+}
+.namebox {
+  size: 25;
+  width: 150px;
+  display: inline-block;
+}
+.nameboxlabel {
+  margin-right: 20px;
+  width: 100px;
+  display: inline-block;
+  text-align: right;
+}
+/* Next 3 from JQueryUI site */
+.ui-button { margin-left: -1px; }
+.ui-button-icon-only .ui-button-text { padding: 0.35em; } 
+.ui-autocomplete-input { margin: 0; padding: 0.48em 0 0.47em 0.45em; }
+.ui-autocomplete {
+  max-height: 300px;
+  overflow-y: auto;
+  /* prevent horizontal scrollbar */
+  overflow-x: hidden;
+  /* add padding to account for vertical scrollbar */
+  padding-right: 20px;
+}
+input[type="text"] {
+  height: 25px;
+}
+input[type="submit"] {
+  margin-top: 30px;
+}
