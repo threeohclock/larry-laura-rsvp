@@ -45,6 +45,16 @@ body{}
 }
 .namebox_container {
   display: none;
+  margin-top: 9px;
+  width: auto;
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.odd {
+}
+.even {
+  background-color: #9FF;
 }
 .namebox {
   size: 25;
