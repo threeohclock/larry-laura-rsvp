@@ -72,24 +72,18 @@ class PopulateTestData(RequestHandler):
   def get(self):
     foo = Party(name='Test Party 1',
                 secret='foo',
-                email='datavortex+foo@gmail.com')
+                email='datavortex+foo@gmail.com').put()
     bar = Party(name='Test Party 2',
                 secret='bar',
                 size=2,
-                email='datavortex+bar@gmail.com')
+                email='datavortex+bar@gmail.com').put()
     baz = Party(name='Test Party 3',
                 secret='baz',
                 email='datavortex+baz@gmail.com',
-                size=5)
-    person1 = Person(name='Person One', meal='Steak', party=baz)
-    person2 = Person(name='Person Two', meal='Fish', hidden_worlds=False, party=baz)
-    person3 = Person(name='Person Three', meal='Veggitarian', hidden_worlds=True, party=baz)
-    foo.put()
-    bar.put()
-    baz.put()
-    person1.put()
-    person2.put()
-    person3.put()
+                size=5).put()
+    Person(name='Person One', meal='Steak', party=baz).put()
+    Person(name='Person Two', meal='Fish', hidden_worlds=False, party=baz).put()
+    Person(name='Person Three', meal='Vegetarian', hidden_worlds=True, party=baz).put()
     self.DEBUG('Created test data.')
 
 class LandingWithoutKeyword(RequestHandler):
@@ -159,11 +153,16 @@ class PartyDetails(RequestHandler):
     """Get count of guests and guest names."""
     party = GetUserFromSession()
     party.size = int(self.request.get('coming'))
+    party.put()  # This needs to happen before adding new guests
 
     guests = {}  # No dictionary comprehensions in appengine's python 2.x
     for guest_number in range(1, party.size+1):
-      guests[self.request.get('name%s' % guest_number).strip()] = self.request.get('meal%s' % guest_number)
-
+      if self.request.get('hiddenworlds%s' % guest_number):
+        hiddenworlds = True
+      else:
+        hiddenworlds = False
+      guests[self.request.get('name%s' % guest_number).strip()] = (
+          self.request.get('meal%s' % guest_number), hiddenworlds)
     # Sets help decide if we should do an update, delete, and/or add
     existing_guests = set(Names(party))
     new_guests = set(guests.keys())
@@ -172,55 +171,39 @@ class PartyDetails(RequestHandler):
     [p.delete() for p in party.people.filter('name IN', list(existing_guests - new_guests))]
     # Now that they're gone, update whoever is left
     for guest in party.people:
-      guest.meal = guests[guest.name]
+      guest.meal = guests[guest.name][0]
+      guest.hidden_worlds = guests[guest.name][1]
       guest.put()
     # And add the new people:
     for guest in new_guests.difference(existing_guests):
-      Person(name=guest, meal=guests[guest], party=party).put()
-    party.put()
+      Person(name=guest, meal=guests[guest][0], hidden_worlds=guests[guest][1], party=party).put()
+
+    template_vars = {'room': party.room_number, 'notes': party.notes}
+    # self.WriteTemplate('trip_detail.html', template_vars)
     self.DEBUG('Coming count: "%s"<br>Names are: %s' % (party.size, Names(party)))
-    template_vars = {'room': party.room_number}
-    self.WriteTemplate('trip_detail.html', template_vars)
+    for guest in party.people:
+      self.DEBUG('PERSON: Name: %s, Meal: %s, Hidden Worlds: %s' % (guest.name, guest.meal, guest.hidden_worlds))
 
 class TripDetails(RequestHandler):
   def post(self):
-    """Get count of guests and guest names."""
+    """Get room number and notes block."""
     party = GetUserFromSession()
     room = self.request.get('roomnumber')
-    try:
-      party.arrival_date = datetime.strptime(self.request.get('from'), JQUERY_DATE_FORMAT).date()
-      party.departure_date = datetime.strptime(self.request.get('to'), JQUERY_DATE_FORMAT).date()
-    except:
-      template_vars = {'room': room, 'hotel': hotel}
-      if party.arrival_date:
-        template_vars['arrival'] = JsDate(party.arrival_date)
-      if party.departure_date:
-        template_vars['departure'] = JsDate(party.departure_date)
-      self.DEBUG('Template vars: %s' % template_vars)
-      self.ERROR('Sorry, I didn\'t understand those arrival and departure dates.  Please use the selection widgets, or enter them in a MM/DD/YYYY format.', 'trip_detail.html', template_vars)
-      return
-
-    if party.arrival_date > party.departure_date:
-      template_vars = {'room': room, 'hotel': hotel}
-      self.ERROR('The departure date (%s) cannot be before the arrival date (%s)!' % (JsDate(party.departure_date), JsDate(party.arrival_date)), 'trip_detail.html', template_vars)
-      return
-
+    party.notes = self.request.get('notes')
     if room:
       party.room_number = int(room)
-      party.hotel_name = None
-    elif hotel:
-      party.room_number = None
-      party.hotel_name =  hotel
-    else:
-      template_vars = {'room': party.room_number, 'hotel': party.hotel_name}
-      if party.arrival_date and party.departure_date:
-        template_vars['arrival'] = JsDate(party.arrival_date)
-        template_vars['departure'] = JsDate(party.departure_date)
-      self.ERROR('Please select a room at Ana y Jose, type in a different hotel, or select one from the list.', 'trip_detail.html', template_vars)
-      return
-    # party.put()
-    self.DEBUG('Room number: %s' % (party.room_number,))
- 
+    party.put()
+    self.DEBUG('Room number: %s<br />Notes: "%s"' % (party.room_number, party.notes))
+    self.WriteTemplate('confirmation.html', {'party': party})
+
+class Confirmation(RequestHandler): 
+  def post(self):
+    party = GetUserFromSession()
+    self.EmailConfirmation()
+    self.DEBUG('Room number: %s<br />Notes: "%s"' % (party.room_number, party.notes))
+
+  def EmailConfirmation():
+    pass
 
 def main():
    application = webapp.WSGIApplication([('/', LandingWithoutKeyword),
@@ -229,6 +212,7 @@ def main():
                                          ('/yesorno', YesOrNo),
                                          ('/partydetail', PartyDetails),
                                          ('/tripdetail', TripDetails),
+                                         ('/confirm', Confirmation),
                                          ('/.{1,10}', SecretWord)],
                                         debug=DEBUGGING)
    util.run_wsgi_app(application)

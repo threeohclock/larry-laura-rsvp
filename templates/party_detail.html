@@ -67,7 +67,7 @@ function ValidateForm() {
     </div>
     <div id="nameboxes">
       {% for i in 1to8 %}
-        <div class="namebox_container {% cycle odd,even %}" id="namebox{{ forloop.counter }}">
+        <div class="namebox_container" id="namebox{{ forloop.counter }}">
           <label for='name{{ forloop.counter }}' class="nameboxlabel">{{ i.0 }} guest</label>
           <input type="text" name="name{{ forloop.counter }}" class="namebox"
           {% if i.1 %}value="{{ i.1.name }}"{% endif %} />
