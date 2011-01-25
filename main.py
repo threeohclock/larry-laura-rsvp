@@ -11,7 +11,7 @@ from appengine_utilities import sessions
 
 template.register_template_library('django.contrib.humanize.templatetags.humanize')
 
-DEBUGGING = False
+DEBUGGING = True
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 ORDINALS = ('First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth')
 FOOD_CHOICES = ('Steak', 'Fish', 'Vegetarian')
@@ -166,7 +166,7 @@ class PartyDetails(RequestHandler):
     # Sets help decide if we should do an update, delete, and/or add
     existing_guests = set(Names(party))
     new_guests = set(guests.keys())
-   
+
     # First delete existing guests that weren't on the form
     [p.delete() for p in party.people.filter('name IN', list(existing_guests - new_guests))]
     # Now that they're gone, update whoever is left
@@ -178,8 +178,8 @@ class PartyDetails(RequestHandler):
     for guest in new_guests.difference(existing_guests):
       Person(name=guest, meal=guests[guest][0], hidden_worlds=guests[guest][1], party=party).put()
 
-    template_vars = {'room': party.room_number, 'notes': party.notes}
-    # self.WriteTemplate('trip_detail.html', template_vars)
+    template_vars = {'roomnumber': party.room_number, 'notes': party.notes}
+    self.WriteTemplate('trip_detail.html', template_vars)
     self.DEBUG('Coming count: "%s"<br>Names are: %s' % (party.size, Names(party)))
     for guest in party.people:
       self.DEBUG('PERSON: Name: %s, Meal: %s, Hidden Worlds: %s' % (guest.name, guest.meal, guest.hidden_worlds))
