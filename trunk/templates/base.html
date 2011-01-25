@@ -6,15 +6,9 @@
 <script type="text/javascript">
 google.load("jquery", "1.4.4");
 google.load("jqueryui", "1.8.8");
-function DrawProgress () {
-  $( "#progressbar" ).progressbar({
-    value: {% block progress %}{% endblock %}
-  });
-};
 
 function DrawButtons() {
   $( "button, input:submit").button();
-  // $( "a", ".demo" ).click(function() { return false; });
 };
 
 function ShowError(message) {
@@ -24,7 +18,6 @@ function ShowError(message) {
 {% block ExtraJavascript %}{% endblock %}
 {% block OnLoad %}
 function OnLoad() {
-  DrawProgress();
   DrawButtons();
 {% endblock %}
 }; {# This allows for block.super to be used to add functions to OnLoad #}

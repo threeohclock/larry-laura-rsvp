@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block title %}Who is coming?{% endblock %}
-{% block progress %}40{% endblock %}
 
 {% block ExtraJavascript %}
 function ShowHideTextFields() {
@@ -19,6 +18,10 @@ function ShowHideTextFields() {
 function SetButtons() {
   {% if size %}$( "#radio{{ size }}" ).attr("checked", "checked");{% endif %}
   $( "#radio" ).buttonset();
+  for (i=1;i<=8;i++) {
+    $( "#meal" + i).buttonset();
+    $( "#hiddenworlds" + i).button();
+  }
   $( "#partysubmit" ).attr("disabled", 'disabled');
   $( "#radio" ).change(ShowHideTextFields);
   $( '#partydetail_form' ).submit(ValidateForm);
@@ -28,9 +31,14 @@ function ValidateForm() {
     var name_array = new Array();
     for (i=1;i<=people;i++) {
       person = $('input[name="name'+i+'"]').val();
+      meal = $('input:radio[name="meal'+i+'"]:checked').val();
       name_array.push($.trim(person.toLowerCase()));
       if (!person) {
         ShowError("Please don't leave any name fields blank!");
+        return false;
+      }
+      if (!meal) {
+        ShowError("Please select a meal preference for each guest, including " + person + "!");
         return false;
       }
     }
@@ -48,7 +56,7 @@ function ValidateForm() {
 {% endblock %}
 
 {% block content %}
-<p>How many in your party, and your names, please?
+<p>Please tell us how many are in your party, confirm, add, or remove names from your invitation, and let us know your dinner preference and whether you would like to join us at the Hidden Worlds Adventure Park.
 
     <form action="/partydetail" id="partydetail_form" method="post">
     <div id="radio">
@@ -59,10 +67,26 @@ function ValidateForm() {
     </div>
     <div id="nameboxes">
       {% for i in 1to8 %}
-        <div class="namebox_container" id="namebox{{ forloop.counter }}">
+        <div class="namebox_container {% cycle odd,even %}" id="namebox{{ forloop.counter }}">
           <label for='name{{ forloop.counter }}' class="nameboxlabel">{{ i.0 }} guest</label>
           <input type="text" name="name{{ forloop.counter }}" class="namebox"
-          {% if i.1 %}value="{{ i.1 }}"{% endif %}/><br />
+          {% if i.1 %}value="{{ i.1.name }}"{% endif %} />
+          <span id="meal{{ forloop.counter }}">
+            <label for="steak{{ forloop.counter }}">Steak</label>
+            <input type="radio" id="steak{{ forloop.counter }}" value="Steak" name="meal{{ forloop.counter }}"
+              {% ifequal i.1.meal "Steak" %}checked="checked"{% endifequal %} />
+            <label for="fish{{ forloop.counter }}">Fish</label>
+            <input type="radio" id="fish{{ forloop.counter }}" value="Fish" name="meal{{ forloop.counter }}"
+              {% ifequal i.1.meal "Fish" %}checked="checked"{% endifequal %} />
+            <label for="vegetarian{{ forloop.counter }}">Vegetarian</label>
+            <input type="radio" id="vegetarian{{ forloop.counter }}" value="Vegetarian" name="meal{{ forloop.counter }}"
+              {% ifequal i.1.meal "Vegetarian" %}checked="checked"{% endifequal %} />
+          </span>
+          <span id="hiddenworlds_container{{ forloop.counter }}">
+            <label for="hiddenworlds{{ forloop.counter }}">Hidden Worlds</label>
+            <input type="checkbox" name="hiddenworlds{{ forloop.counter }}" id="hiddenworlds{{ forloop.counter }}"
+            {% if i.1.hidden_worlds %}checked="checked"{% endif %} />
+          </span>
         </div>
       {% endfor %}
     </div>

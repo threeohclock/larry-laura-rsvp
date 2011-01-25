@@ -14,9 +14,11 @@ template.register_template_library('django.contrib.humanize.templatetags.humaniz
 DEBUGGING = False
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 ORDINALS = ('First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth')
+FOOD_CHOICES = ('Steak', 'Fish', 'Vegetarian')
 
 JQUERY_DATE_FORMAT = '%m/%d/%Y'
 JsDate = lambda pydate: pydate.strftime(JQUERY_DATE_FORMAT)
+Names = lambda party: [p.name for p in party.people]
 
 class Party(db.Model):
   name = db.StringProperty(required=True)
@@ -24,18 +26,18 @@ class Party(db.Model):
   email = db.EmailProperty(required=True)
   is_coming = db.BooleanProperty()
   size = db.IntegerProperty()
-  people_names= db.StringListProperty()
   room_number = db.IntegerProperty()
-  hotel_name = db.StringProperty()
-  arrival_date = db.DateProperty()
-  departure_date = db.DateProperty()
-  chicken = db.IntegerProperty()
-  fish = db.IntegerProperty()
-  hidden_worlds = db.IntegerProperty()
-  tulum_ruins = db.IntegerProperty()
-  tulum_ruins_time = db.DateTimeProperty()
   notes = db.TextProperty()
-  date = db.DateTimeProperty(auto_now_add=True)
+  creation_date = db.DateTimeProperty(auto_now=True)
+  modified_date = db.DateTimeProperty(auto_now_add=True)
+
+class Person(db.Model):
+  name = db.StringProperty(required=True)
+  meal = db.StringProperty(choices=set(FOOD_CHOICES))
+  party = db.ReferenceProperty(Party, collection_name='people')
+  hidden_worlds = db.BooleanProperty()
+  creation_date = db.DateTimeProperty(auto_now=True)
+  modified_date = db.DateTimeProperty(auto_now_add=True)
 
 class RequestHandler(webapp.RequestHandler):
   def WriteTemplate(self, filename, kwargs):
@@ -73,17 +75,22 @@ class PopulateTestData(RequestHandler):
                 email='datavortex+foo@gmail.com')
     bar = Party(name='Test Party 2',
                 secret='bar',
+                size=2,
                 email='datavortex+bar@gmail.com')
     baz = Party(name='Test Party 3',
                 secret='baz',
                 email='datavortex+baz@gmail.com',
-                size=5,
-                people_names=['Person One','Person Two'])
+                size=5)
+    person1 = Person(name='Person One', meal='Steak', party=baz)
+    person2 = Person(name='Person Two', meal='Fish', hidden_worlds=False, party=baz)
+    person3 = Person(name='Person Three', meal='Veggitarian', hidden_worlds=True, party=baz)
     foo.put()
     bar.put()
     baz.put()
+    person1.put()
+    person2.put()
+    person3.put()
     self.DEBUG('Created test data.')
-
 
 class LandingWithoutKeyword(RequestHandler):
   """Initial Page that prompts for secret word. """
@@ -142,8 +149,7 @@ class YesOrNo(RequestHandler):
       party.is_coming = True
       party.put()
       template_vars = {'size': party.size,
-                       'names': party.people_names,
-                       '1to8': map(None, ORDINALS, party.people_names)}
+                       '1to8': map(None, ORDINALS, party.people)}
       self.WriteTemplate('party_detail.html', template_vars)
       return
     self.ERROR('Please select either yes or no!', 'is_coming.html', {'name': party.name})
@@ -153,14 +159,27 @@ class PartyDetails(RequestHandler):
     """Get count of guests and guest names."""
     party = GetUserFromSession()
     party.size = int(self.request.get('coming'))
-    names = [self.request.get('name%s' % n).strip() for n in range(1, party.size+1)]
-    party.people_names = names
+
+    guests = {}  # No dictionary comprehensions in appengine's python 2.x
+    for guest_number in range(1, party.size+1):
+      guests[self.request.get('name%s' % guest_number).strip()] = self.request.get('meal%s' % guest_number)
+
+    # Sets help decide if we should do an update, delete, and/or add
+    existing_guests = set(Names(party))
+    new_guests = set(guests.keys())
+   
+    # First delete existing guests that weren't on the form
+    [p.delete() for p in party.people.filter('name IN', list(existing_guests - new_guests))]
+    # Now that they're gone, update whoever is left
+    for guest in party.people:
+      guest.meal = guests[guest.name]
+      guest.put()
+    # And add the new people:
+    for guest in new_guests.difference(existing_guests):
+      Person(name=guest, meal=guests[guest], party=party).put()
     party.put()
-    self.DEBUG('Coming count: "%s"<br>Names are: %s' % (party.size, party.people_names))
-    template_vars = {'room': party.room_number, 'hotel': party.hotel_name}
-    if party.arrival_date and party.departure_date:
-      template_vars['arrival'] = JsDate(party.arrival_date)
-      template_vars['departure'] = JsDate(party.departure_date)
+    self.DEBUG('Coming count: "%s"<br>Names are: %s' % (party.size, Names(party)))
+    template_vars = {'room': party.room_number}
     self.WriteTemplate('trip_detail.html', template_vars)
 
 class TripDetails(RequestHandler):
@@ -168,7 +187,6 @@ class TripDetails(RequestHandler):
     """Get count of guests and guest names."""
     party = GetUserFromSession()
     room = self.request.get('roomnumber')
-    hotel = self.request.get('hotelname')
     try:
       party.arrival_date = datetime.strptime(self.request.get('from'), JQUERY_DATE_FORMAT).date()
       party.departure_date = datetime.strptime(self.request.get('to'), JQUERY_DATE_FORMAT).date()
@@ -201,7 +219,7 @@ class TripDetails(RequestHandler):
       self.ERROR('Please select a room at Ana y Jose, type in a different hotel, or select one from the list.', 'trip_detail.html', template_vars)
       return
     # party.put()
-    self.DEBUG('Arrival date: %s<br>Departure date: %s<br>Room number: %s<br>Hotel name: %s' % (party.arrival_date, party.departure_date, party.room_number, party.hotel_name))
+    self.DEBUG('Room number: %s' % (party.room_number,))
  
 
 def main():
