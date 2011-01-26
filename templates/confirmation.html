@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Your RSVP is confirmed!{% endblock %}
+
+{% block content %}
+<p>Thanks for your RSVP!  You will get an email at {{ domain }} with the following details:
+<pre>
+Name: {{ party.name }}
+URL:  <a href="http://rsvp.larryandlaura.us/{{ party.secret }}">link</a>
+Email: {{ party.email }}
+Coming: {{ party.is_coming }}
+Size: {{ party.size }}
+Room: {{ party.room_number }}
+Notes: {{ party.notes }}
+Creation: {{ party.creation_date }}
+Modified: {{ party.modified_date }}
+</pre>
+
+{% for p in party.people %}
+<pre>
+Name: {{ p.name }}
+Meal: {{ p.meal }}
+Hidden Worlds:  {{ p.hidden_worlds }}
+Creation:  {{ p.creation_date }}
+Modified: {{ p.modified_date }}
+</pre>
+{% endfor %}
+
+</p>
+{% endblock %}
