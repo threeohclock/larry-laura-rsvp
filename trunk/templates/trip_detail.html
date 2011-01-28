@@ -8,7 +8,7 @@
 
 {% block ExtraJavascript %}
 function SetButtons() {
-  {% if roomnumber %}$( "#room{{ roomnumber }}" ).attr("checked", "checked");{% endif %}
+  {% if roomnumber %}$( "#room{{ roomnumber }}" ).attr("selected", true);{% endif %}
   $( '#tripdetail_form' ).submit(ValidateForm);
   $( '#notesfield' ).autoResize();
 };
@@ -23,6 +23,7 @@ function ValidateForm() {
     ShowError('That\'s MY room, you cheeky bastard!');
     return false;
   }
+  $( "#tripsubmit" ).attr("disabled", 'disabled');
 };
 
 
@@ -41,36 +42,16 @@ function ValidateForm() {
       Your <a href="http://www.larryandlaura.us/ana-y-jose" target="_blank">Ana y Jos&eacute;</a> room number and name
       <select id="roomnumber" name="roomnumber">
         {% if not roomnumber %}<option selected></option>{% endif %}
-        <option value="0" id="room0">We are staying elsewhere</option>
-        <option value="1" id="room1">1  - Amanecer</option>
-        <option value="2" id="room2">2  - Brisa del Mar</option>
-        <option value="3" id="room3">3  - Nube</option>
-        <option value="4" id="room4">4  - Lluvia</option>
-        <option value="5" id="room5">5  - Sol</option>
-        <option value="6" id="room6">6  - Luna</option>
-        <option value="7" id="room7">7  - Tulum</option>
-        <option value="8" id="room8">8  - Palmera</option>
-        <option value="9" id="room9">9  - Caracol</option>
-        <option value="10" id="room10">10 - Coral</option>
-        <option value="11" id="room11">11 - Sian Ka'an</option>
-        <option value="12" id="room12">12 - Ana</option>
-        <option value="13" id="room13">13 - Atardecer</option>
-        <option value="14" id="room14">14 - Jose</option>
-        <option value="15" id="room15">15 - Carpinteria</option>
-        <option value="16" id="room16">16 - Casa de Patron</option>
-        <option value="17" id="room17">17 - Estrella del Mar</option>
-        <option value="18" id="room18">18 - Agua de Mar</option>
-        <option value="19" id="room19">19 - Encantada</option>
-        <option value="20" id="room20">20 - Capricho</option>
-        <option value="22" id="room22">22 - Arena</option>
-        <option value="23" id="room23">23 - Coba Villa</option>
+        {% for room in rooms.items %}
+          <option value="{{ room.0 }}" id="room{{ room.0 }}">{% if room.0 %}{{ room.0 }} - {% endif %}{{ room.1 }}</option>
+        {% endfor %}
       </select>
       <div id="notesinput">
         Please enter any additional notes, especially food allergies or other concerns:<br />
         <textarea id="notesfield" name="notes">{% if notes %}{{ notes }}{% endif %}</textarea>
       </div>
     </div>
-   <input id="tripsubmit" type="submit" />
+   <input id="tripsubmit" type="submit" value="Submit RSVP" />
   </form>
 </p>
 {% endblock %}
