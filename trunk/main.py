@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 import os
+import confirmation_mail
 from datetime import datetime
 from google.appengine.ext import db
+from google.appengine.api import mail
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.ext.webapp import template
@@ -15,6 +17,30 @@ DEBUGGING = True
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 ORDINALS = ('First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth')
 FOOD_CHOICES = ('Steak', 'Fish', 'Vegetarian')
+
+ROOMS = {0: 'We are staying elsewhere',
+         1: 'Amanecer',
+         2: 'Brisa del Mar',
+         3: 'Nube',
+         4: 'Lluvia',
+         5: 'Sol',
+         6: 'Luna',
+         7: 'Tulum',
+         8: 'Palmera',
+         9: 'Caracol',
+        10: 'Coral',
+        11: "Sian Ka'an",
+        12: 'Ana',
+        13: 'Atardecer',
+        14: 'Jose',
+        15: 'Carpinteria',
+        16: 'Casa de Patron',
+        17: 'Estrella del Mar',
+        18: 'Agua de Mar',
+        19: 'Encantada',
+        20: 'Capricho',
+        22: 'Arena',
+        23: 'Coba Villa'}
 
 JQUERY_DATE_FORMAT = '%m/%d/%Y'
 JsDate = lambda pydate: pydate.strftime(JQUERY_DATE_FORMAT)
@@ -30,6 +56,7 @@ class Party(db.Model):
   notes = db.TextProperty()
   creation_date = db.DateTimeProperty(auto_now=True)
   modified_date = db.DateTimeProperty(auto_now_add=True)
+  confirmed_once = db.BooleanProperty()
 
 class Person(db.Model):
   name = db.StringProperty(required=True)
@@ -68,18 +95,29 @@ def GetUserFromSession():
     self.ERROR('Failure trying to look up your account from your session, please re-enter your secret word', 'get_keyword.html')
   return party
 
+def PrettyList(unpretty_list):
+  if not unpretty_list:
+    return ''
+  if len(unpretty_list) == 1:
+    return unpretty_list[0]
+  elif len(unpretty_list) == 2:
+    return ' and '.join(unpretty_list)
+  else:
+    end_of_list = ', %s and %s' % (unpretty_list.pop(-2), unpretty_list.pop())
+    return ', '.join(unpretty_list) + end_of_list
+
 class PopulateTestData(RequestHandler):
   def get(self):
     foo = Party(name='Test Party 1',
                 secret='foo',
-                email='datavortex+foo@gmail.com').put()
+                email='datavortex+test@gmail.com').put()
     bar = Party(name='Test Party 2',
                 secret='bar',
                 size=2,
-                email='datavortex+bar@gmail.com').put()
+                email='datavortex+test@gmail.com').put()
     baz = Party(name='Test Party 3',
                 secret='baz',
-                email='datavortex+baz@gmail.com',
+                email='datavortex+test@gmail.com',
                 size=5).put()
     Person(name='Person One', meal='Steak', party=baz).put()
     Person(name='Person Two', meal='Fish', hidden_worlds=False, party=baz).put()
@@ -178,7 +216,7 @@ class PartyDetails(RequestHandler):
     for guest in new_guests.difference(existing_guests):
       Person(name=guest, meal=guests[guest][0], hidden_worlds=guests[guest][1], party=party).put()
 
-    template_vars = {'roomnumber': party.room_number, 'notes': party.notes}
+    template_vars = {'roomnumber': party.room_number, 'notes': party.notes, 'rooms': ROOMS}
     self.WriteTemplate('trip_detail.html', template_vars)
     self.DEBUG('Coming count: "%s"<br>Names are: %s' % (party.size, Names(party)))
     for guest in party.people:
@@ -190,20 +228,39 @@ class TripDetails(RequestHandler):
     party = GetUserFromSession()
     room = self.request.get('roomnumber')
     party.notes = self.request.get('notes')
+
     if room:
       party.room_number = int(room)
+    if party.room_number:
+      room = ROOMS[party.room_number]
+    else:
+      room = False
+
+    if party.confirmed_once:
+      subject = "Your RSVP to Our Wedding Was Updated"
+    else:
+      subject = "Confirmation of Your RSVP to Our Wedding"
+    party.confirmed_once = True
+
     party.put()
+
     self.DEBUG('Room number: %s<br />Notes: "%s"' % (party.room_number, party.notes))
+    #if not DEBUGGING:
+
+    # Create the body of the message (a plain-text and an HTML version).
+    template_vars = {'party': party,
+                     'people': PrettyList([p.name for p in party.people]),
+                     'room': room,
+                     'hidden_worlds': PrettyList([p.name.split()[0] for p in party.people if p.hidden_worlds]),
+                     'meals': PrettyList(list(set([p.meal.lower() for p in party.people])))}
+    text = template.render(os.path.join(TEMPLATE_DIR, 'email_confirmation.txt'), template_vars)
+    html = template.render(os.path.join(TEMPLATE_DIR, 'email_confirmation.html'), template_vars)
+    mail.send_mail(sender='Larry and Laura <11-11-11@larryandlaura.us>',
+                   to='%s <%s>' % (party.name, party.email),
+                   subject=subject,
+                   body=text,
+                   html=html)
     self.WriteTemplate('confirmation.html', {'party': party})
-
-class Confirmation(RequestHandler): 
-  def post(self):
-    party = GetUserFromSession()
-    self.EmailConfirmation()
-    self.DEBUG('Room number: %s<br />Notes: "%s"' % (party.room_number, party.notes))
-
-  def EmailConfirmation():
-    pass
 
 def main():
    application = webapp.WSGIApplication([('/', LandingWithoutKeyword),
@@ -212,7 +269,6 @@ def main():
                                          ('/yesorno', YesOrNo),
                                          ('/partydetail', PartyDetails),
                                          ('/tripdetail', TripDetails),
-                                         ('/confirm', Confirmation),
                                          ('/.{1,10}', SecretWord)],
                                         debug=DEBUGGING)
    util.run_wsgi_app(application)
