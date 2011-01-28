@@ -1,0 +1,87 @@
+<html>
+<body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0" bgcolor='#3B5F7B'>
+
+<STYLE>
+ .title { font-size:20px; font-weight:bold; color:#CC6600; font-family:arial; line-height:110%; }
+ .subTitle { font-size:11px; font-weight:normal; color:#666666; font-style:italic; font-family:arial; }
+ .defaultText { font-size:12px; color:#000000; line-height:150%; font-family:trebuchet ms; }
+ .footerRow { background-color:#FFFFCC; border-top:10px solid #FFFFFF; }
+</STYLE>
+
+<table width="100%" cellpadding="10" cellspacing="0" class="backgroundTable" bgcolor="#3B5F7B" >
+<tr>
+<td valign="top" align="center">
+
+
+<table width="550" cellpadding="0" cellspacing="0">
+
+<tr>
+<td background="http://www.datavortex.net/email/header.jpg" align="center" style="background-color:#9BC5DB">
+      <table width="500" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="color: #005596; text-align:center;">
+             <h1>Thanks for your RSVP</h1>
+           </td>
+        </tr>
+      </table>
+</td>
+</tr>
+
+<tr>
+<td style="background-color:#9BC5DB;border-top:0px solid #333333;border-bottom:10px solid #FFFFFF;"><center><IMG id=editableImg1 SRC="http://www.datavortex.net/email/beach.jpg" BORDER="0" title="Larry and Lauras Wedding"  alt="Larry and Laura 2011" align="center"></center></td>
+</tr>
+
+
+</table>
+
+
+<table width="550" cellpadding="20" cellspacing="0" bgcolor="#3B5F7B">
+<tr>
+<td bgcolor="#3B5F7B" valign="top" style="font-size:12px;color:#CEDBDF;line-height:150%;font-family:trebuchet ms;">
+
+<p>
+<span style="font-size:20px;font-weight:bold;color:#B0DAE9;font-family:arial;line-height:110%;">We are thankful to have the {{ party.size|apnumber }} of you</span><br>
+<span style="font-size:11px;font-weight:normal;color:#;font-style:italic;font-family:arial;">Quisque dignissim dictum ante</span><br>
+We have received your RSVP for {{ people }}.  Also, we have you down for {{ meals }} meal{{ party.size|pluralize }}{% if hidden_worlds %}, and {{ hidden_worlds }} joining us at Hidden Worlds on the 12th.{% else %}.   {% endif %}
+{%if room %}If you haven&rsquo;t reserved your room at Ana y Jos&eacute;, which is {{ room }} (room number {{ party.room_number }}), please contact Oscar as soon as possible to do so.
+{% else %}You noted that your reservation is with another hotel or resort.  If you need help getting to Ana y Jos&eacute; for the ceremony and reception, or if you decide you would like to stay with us, please reply.
+{% endif %}
+</p>
+
+{% if party.notes %}
+<p>
+In addition, we received these notes:
+  <blockquote style="font-size:10px;font-weight:normal;font-style:italic;font-family:arial;">{{ party.notes|linebreaksbr }}</blockquote>
+</p>
+{% endif %}
+
+<p>
+<span style="font-size:20px;font-weight:bold;color:#B0DAE9;font-family:arial;line-height:110%;">Changes OK Until May</span><br>
+You are free to update and correct all of the information in your RSVP, either using  
+<a style="color:#99FFEB;" href="http://rsvp.larryandlaura.us/{{ party.secret }}">your personalized link</a>, or by using your secret word, &quot;{{ party.secret }}&quot; at <a style="color:#99FFEB;" href="http://www.larryandlaura.us/">our wedding site</a>.  If you need to update your reservations at Ana y Jos&eacute;, please <a style="color:#99FFEB;" href="http://www.anayjose.com/contact-us/">contact Oscar</a>.  If you have any other questions please reply to this message and we'll get back to you.
+</p>
+
+<p>
+<span style="font-size:20px;font-weight:bold;color:#B0DAE9;font-family:arial;line-height:110%;">Getting There</span><br>
+Please see our wedding site for information about <a style="color:#99FFEB;" href="http://www.larryandlaura.us/tulum/getting-there">getting to Tulum</a>, arranging in advance to have your necessary <a style="color:#99FFEB;" href="http://www.larryandlaura.us/tulum/faq">vaccinations and passports</a>, and planning <a style="color:#99FFEB;" href="http://www.larryandlaura.us/things-to-do">things to do</a> while you are there.
+</p>
+
+</td>
+</tr>
+
+<tr>
+<td style="background-color:#9BC5DB;border-top:10px solid #FFFFFF;" valign="top">
+<span style="font-size:10px;color:#005596;line-height:100%;font-family:verdana;">
+Something here.  Larry and Laura
+</span>
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
