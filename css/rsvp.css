@@ -1,5 +1,6 @@
-body{}
-
+#radio {
+  font-size: 11pt;
+}
 #progressbar {
   width: 70%;
   text-align: center;
@@ -16,6 +17,9 @@ body{}
 }
 #yesnoform {
   text-align: left;
+}
+#nameinstructions {
+  display: none;
 }
 #nameboxes {
   margin-top: 30px;
@@ -39,11 +43,18 @@ body{}
 #notesfield {
   width: 400px;
   padding: 10px;
-  height: 50px;
-  font-family:Sans-serif;
-  font-size:1.2em;
+  height: 70px;
+  font-family: Sans-serif;
+  font-size: 1.2em;
+  line-height: 100%;
+}
+#guestlist {
+  width: 700px ;
+  margin-left: auto ;
+  margin-right: auto ; 
 }
 .rsvpalert {
+  font-size: 11pt;
   margin-top: 30px;
   margin-bottom: 15px;
   width: 60%;
@@ -58,11 +69,6 @@ body{}
   margin-left: auto;
   margin-right: auto;
 }
-.odd {
-}
-.even {
-  background-color: #9FF;
-}
 .namebox {
   size: 25;
   width: 150px;
@@ -70,11 +76,26 @@ body{}
 }
 .nameboxlabel {
   margin-right: 20px;
-  width: 100px;
+  width: 130px;
   display: inline-block;
   text-align: right;
 }
-/* Next 3 from JQueryUI site */
+.helpbutton {
+  display: inline-block;
+  top: -100px;
+  border: 0;
+}
+.helpdialog {
+  font-family:Helvetica,Arial,Verdana,sans-serif;
+  font:normal 13pt Arial,sans-serif;
+}
+.helpdialog a {
+  color: #005596;
+}
+.mealselect, .hiddenworlds-label {
+  font-size: 11pt;
+}
+/* Next 4 from JQueryUI site */
 .ui-button { margin-left: -1px; }
 .ui-button-icon-only .ui-button-text { padding: 0.35em; } 
 .ui-autocomplete-input { margin: 0; padding: 0.48em 0 0.47em 0.45em; }
@@ -87,60 +108,66 @@ body{}
   padding-right: 20px;
 }
 input[type="text"] {
-  height: 25px;
+  height: 30px;
+  font-size: 12pt;
 }
-input[type="submit"] {
+input[type="submit"], button {
   margin-top: 30px;
+  font-size: 11pt;
 }
 input {
-  font-family:georgia!important
+  font-family:georgia!important;
 }
 a {
-  color:#9ff!important
+  color:#9ff;
 }
 h2 a {
-  color:#005596!important
+  color:#005596!important;
+}
+blockquote {
+  width: 440px;
+  border: 1px dotted #9BC5DB;
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2px;
+  white-space: normal;
+  font-size: 10pt;
+  z-index:-1;
 }
 
-/* From sites page */
+/* The rest is from sites page */
 html,body {
   padding:0;
   margin:0;
   direction:ltr;
 }
-
 body {
-  font:normal 10pt Arial,sans-serif;
   font-family:Helvetica,Arial,Verdana,sans-serif;
+  font:normal 13pt Arial,sans-serif;
   color:#cedbdf;
   line-height:125%;
   background-color:#3b5f7b;
 }
-
 body.ar {
   font-size:14px;
 }
-
 a img {
   border:0;
   padding:0;
 }
-
 td {
   vertical-align:top;
   padding:1px 4px;
 }
-
 code {
   color:#9ed2ee;
 }
-
 ol {
   list-style-type:decimal;
 }
-
 ul li {
-  list-style-image:url(ollist-bg.gif);
+  list-style-image:url(bullet.gif);
   list-style-position:outside;
   list-style-type:disc;
 }

@@ -43,7 +43,7 @@ ROOMS = {0: 'We are staying elsewhere',
 
 JQUERY_DATE_FORMAT = '%m/%d/%Y'
 JsDate = lambda pydate: pydate.strftime(JQUERY_DATE_FORMAT)
-Names = lambda party: [p.name for p in party.people]
+Names = lambda party: [p.name for p in party.people.order('creation_date')]
 
 class Party(db.Model):
   name = db.StringProperty(required=True)
@@ -84,15 +84,21 @@ class RequestHandler(webapp.RequestHandler):
   def get(self):
     self.NAVERROR()
 
+  def GetUserFromSession(self):
+    try: 
+      sess = GetSession()
+      party = Party.get_by_id(sess['party_key_id'])
+    except:
+      party = None
+    if not party:
+      self.ERROR('Failure trying to look up your account from your session, please re-enter your secret word', 'get_keyword.html')
+    return party
+
+
+
 def GetSession():
   return sessions.Session(writer="cookie")
 
-def GetUserFromSession():
-  sess = GetSession()
-  party = Party.get_by_id(sess['party_key_id'])
-  if not party:
-    self.ERROR('Failure trying to look up your account from your session, please re-enter your secret word', 'get_keyword.html')
-  return party
 
 def PrettyList(unpretty_list):
   if not unpretty_list:
@@ -168,9 +174,11 @@ class SecretWord(RequestHandler):
 class YesOrNo(RequestHandler):
    def post(self):
     """Handle yes and no responses."""
+    party = self.GetUserFromSession()
+    if not party:
+      return
     coming = self.request.get('coming')
     self.DEBUG('coming: "%s"' % coming)
-    party = GetUserFromSession()
     if coming == 'no':
       party.is_coming = False
       party.put()
@@ -180,7 +188,7 @@ class YesOrNo(RequestHandler):
       party.is_coming = True
       party.put()
       template_vars = {'size': party.size,
-                       '1to8': map(None, ORDINALS, party.people)}
+                       '1to8': map(None, ORDINALS, party.people.order('creation_date'))}
       self.WriteTemplate('party_detail.html', template_vars)
       return
     self.ERROR('Please select either yes or no!', 'is_coming.html', {'name': party.name})
@@ -188,18 +196,24 @@ class YesOrNo(RequestHandler):
 class PartyDetails(RequestHandler):
   def post(self):
     """Get count of guests and guest names."""
-    party = GetUserFromSession()
+    party = self.GetUserFromSession()
+    if not party:
+      return
     party.size = int(self.request.get('coming'))
     party.put()  # This needs to happen before adding new guests
 
     guests = {}  # No dictionary comprehensions in appengine's python 2.x
+    ordered_names = []
+    # Make a dictionary keyed by guest name and keep a list of the names in order
     for guest_number in range(1, party.size+1):
+      name = self.request.get('name%s' % guest_number).strip()
+      meal = self.request.get('meal%s' % guest_number)
       if self.request.get('hiddenworlds%s' % guest_number):
         hiddenworlds = True
       else:
         hiddenworlds = False
-      guests[self.request.get('name%s' % guest_number).strip()] = (
-          self.request.get('meal%s' % guest_number), hiddenworlds)
+      guests[name] = (meal, hiddenworlds)
+      ordered_names.append(name)
     # Sets help decide if we should do an update, delete, and/or add
     existing_guests = set(Names(party))
     new_guests = set(guests.keys())
@@ -211,20 +225,24 @@ class PartyDetails(RequestHandler):
       guest.meal = guests[guest.name][0]
       guest.hidden_worlds = guests[guest.name][1]
       guest.put()
-    # And add the new people:
-    for guest in new_guests.difference(existing_guests):
-      Person(name=guest, meal=guests[guest][0], hidden_worlds=guests[guest][1], party=party).put()
+    # And add the new people in order, so we can sort them by creation date later
+    added_guests = new_guests.difference(existing_guests)
+    for name in ordered_names:
+      if name in added_guests:
+        Person(name=name, meal=guests[name][0], hidden_worlds=guests[name][1], party=party).put()
 
     template_vars = {'roomnumber': party.room_number, 'notes': party.notes, 'rooms': ROOMS}
     self.WriteTemplate('trip_detail.html', template_vars)
     self.DEBUG('Coming count: "%s"<br>Names are: %s' % (party.size, Names(party)))
-    for guest in party.people:
+    for guest in party.people.order('creation_date'):
       self.DEBUG('PERSON: Name: %s, Meal: %s, Hidden Worlds: %s' % (guest.name, guest.meal, guest.hidden_worlds))
 
 class TripDetails(RequestHandler):
   def post(self):
     """Get room number and notes block."""
-    party = GetUserFromSession()
+    party = self.GetUserFromSession()
+    if not party:
+      return
     room = self.request.get('roomnumber')
     party.notes = self.request.get('notes')
 
@@ -235,12 +253,13 @@ class TripDetails(RequestHandler):
     else:
       room = False
 
-    if party.confirmed_once:
+    confirmed_once = party.confirmed_once
+    if confirmed_once:
       subject = "Your RSVP to Our Wedding Was Updated"
     else:
       subject = "Confirmation of Your RSVP to Our Wedding"
-    party.confirmed_once = True
 
+    party.confirmed_once = True
     party.put()
 
     self.DEBUG('Room number: %s<br />Notes: "%s"' % (party.room_number, party.notes))
@@ -248,9 +267,9 @@ class TripDetails(RequestHandler):
     #if not DEBUGGING:
     # Create the body of the message (a plain-text and an HTML version).
     template_vars = {'party': party,
-                     'people': PrettyList([p.name for p in party.people]),
+                     'people': PrettyList(Names(party)),
                      'room': room,
-                     'hidden_worlds': PrettyList([p.name.split()[0] for p in party.people if p.hidden_worlds]),
+                     'hidden_worlds': PrettyList([p.name.split()[0] for p in party.people.order('creation_date') if p.hidden_worlds]),
                      'meals': PrettyList(list(set([p.meal.lower() for p in party.people])))}
     text = template.render(os.path.join(TEMPLATE_DIR, 'email_confirmation.txt'), template_vars)
     html = template.render(os.path.join(TEMPLATE_DIR, 'email_confirmation.html'), template_vars)
@@ -260,6 +279,7 @@ class TripDetails(RequestHandler):
                    body=text,
                    html=html)
     template_vars = {'domain': party.email.split('@')[1],
+                     'not_first': confirmed_once,
                      'room': room,
                      'party': party}
     self.WriteTemplate('confirmation.html', template_vars)

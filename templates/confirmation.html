@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Your RSVP is confirmed!{% endblock %}
+{% block title %}{% if not_first %}Your RSVP has been updated!{% else %}Your RSVP is confirmed!{% endif %}{% endblock %}
 
 {% block content %}
-<p>Thanks for your RSVP!  We have sent an email to your address at {{ domain }}, confirming the following details:
+<p>Thanks for {% if not_first %}updating {% endif%}your RSVP!  We have sent an email to your address at {{ domain }}, confirming the following details:<br />
 
 The name of your party is {{ party.name }}, and you will be 
 {% if room %}
@@ -11,17 +11,19 @@ joining us at Ana y Jos&eacute; in room {{ room }} (number {{ party.room_number 
 {% else %}
 staying at a hotel other than Ana y Jos&eacute;.
 {% endif %}
-
-The {{ party.size }} people in your party are:
+</p>
+<p>The {{ party.size }} people in your party are:
+<div id="guestlist">
 <ul style="text-align: left">
 {% for p in party.people %}
 <li> {{ p.name }}, preferring a {{ p.meal|lower }} dinner
 {% if p.hidden_worlds %} and joining us at Hidden Worlds{% endif %}</li>
 {% endfor %}
 </ul>
+</div>
 
 {% if party.notes %}And you added the following notes:
-  <blockquote>{{ party.notes }}</blockquote>
+  <blockquote>{{ party.notes|linebreaksbr }}</blockquote>
 {% endif %}
 
 If you need to make any changes, please just return to your <a

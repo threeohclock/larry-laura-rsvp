@@ -1,11 +1,21 @@
 {% extends "base.html" %}
 
+{% block ExtraJavascript %}
+function SetupHelp() {
+  $( "#keywordhelptext" ).dialog({autoOpen: false, title: 'Secret Word Help', width: 400});
+  $( '#keywordhelp' ).click(function() {$( "#keywordhelptext" ).dialog('open');});
+};
+{% endblock %}
+
+{% block OnLoad %}
+{{ block.super }}
+  SetupHelp();
+{% endblock %}
+
 {% block title %}Secret Word, Please?{% endblock %}
 
-{% block progress %}5{% endblock %}
-
 {% block content %}
-<p>Please enter your secret word from your email or paper invitation:
+<p>Please enter your secret word <span id="keywordhelp" class="ui-state-default ui-corner-all ui-icon ui-icon-help helpbutton" title="Get help"></span> from your email or paper invitation:
   <form action="/secretword" method="post">
     <div>
       <input type="text" name="keyword" size="12">
@@ -13,4 +23,5 @@
     </div>
   </form>
 </p>
+<div id="keywordhelptext" class="helpdialog">Your secret word is found in the email invitation that we sent to you, or enclosed with your paper invitation.  If you don&rsquo;t know your secret word, email us at 11-11-11@larryandlaura.us.</div>
 {% endblock %}
