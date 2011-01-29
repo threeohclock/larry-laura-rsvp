@@ -3,28 +3,31 @@
 {% block title %}Your RSVP is confirmed!{% endblock %}
 
 {% block content %}
-<p>Thanks for your RSVP!  You will get an email at {{ domain }} with the following details:
-<pre>
-Name: {{ party.name }}
-URL:  <a href="http://rsvp.larryandlaura.us/{{ party.secret }}">link</a>
-Email: {{ party.email }}
-Coming: {{ party.is_coming }}
-Size: {{ party.size }}
-Room: {{ party.room_number }}
-Notes: {{ party.notes }}
-Creation: {{ party.creation_date }}
-Modified: {{ party.modified_date }}
-</pre>
+<p>Thanks for your RSVP!  We have sent an email to your address at {{ domain }}, confirming the following details:
 
+The name of your party is {{ party.name }}, and you will be 
+{% if room %}
+joining us at Ana y Jos&eacute; in room {{ room }} (number {{ party.room_number }}).
+{% else %}
+staying at a hotel other than Ana y Jos&eacute;.
+{% endif %}
+
+The {{ party.size }} people in your party are:
+<ul style="text-align: left">
 {% for p in party.people %}
-<pre>
-Name: {{ p.name }}
-Meal: {{ p.meal }}
-Hidden Worlds:  {{ p.hidden_worlds }}
-Creation:  {{ p.creation_date }}
-Modified: {{ p.modified_date }}
-</pre>
+<li> {{ p.name }}, preferring a {{ p.meal|lower }} dinner
+{% if p.hidden_worlds %} and joining us at Hidden Worlds{% endif %}</li>
 {% endfor %}
+</ul>
+
+{% if party.notes %}And you added the following notes:
+  <blockquote>{{ party.notes }}</blockquote>
+{% endif %}
+
+If you need to make any changes, please just return to your <a
+  href="http://rsvp.larryandlaura.us/{{ party.secret }}">personalized page</a>
+and you can modify anything you have submitted here.  The deadline for changes
+is May 1, 2011.
 
 </p>
 {% endblock %}

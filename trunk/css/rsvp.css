@@ -101,3 +101,46 @@ a {
 h2 a {
   color:#005596!important
 }
+
+/* From sites page */
+html,body {
+  padding:0;
+  margin:0;
+  direction:ltr;
+}
+
+body {
+  font:normal 10pt Arial,sans-serif;
+  font-family:Helvetica,Arial,Verdana,sans-serif;
+  color:#cedbdf;
+  line-height:125%;
+  background-color:#3b5f7b;
+}
+
+body.ar {
+  font-size:14px;
+}
+
+a img {
+  border:0;
+  padding:0;
+}
+
+td {
+  vertical-align:top;
+  padding:1px 4px;
+}
+
+code {
+  color:#9ed2ee;
+}
+
+ol {
+  list-style-type:decimal;
+}
+
+ul li {
+  list-style-image:url(ollist-bg.gif);
+  list-style-position:outside;
+  list-style-type:disc;
+}

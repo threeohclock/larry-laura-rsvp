@@ -1,1 +1,35 @@
-This is a text portion.
+Thanks for your RSVP to our wedding!
+
+We are thankful to have the {{ party.size|apnumber }} of you join us for this
+special day.
+
+We have received your RSVP for {{ people }}.  Also, we have you down for {{ meals }} meal{{ party.size|pluralize }}{% if hidden_worlds %}, and {{ hidden_worlds }} joining us at Hidden Worlds on the 12th.{% else %}.   {% endif %}
+
+{%if room %}If you haven't reserved your room at Ana y Jose;, which is {{ room
+}} (room number {{ party.room_number }}), please contact Oscar at reservations@anayjose.com as soon as possible to do so.
+{% else %}You noted that your reservation is with another hotel or resort.  If you need help getting to Ana y Jose; for the ceremony and reception, or if you decide you would like to stay with us, please reply.
+{% endif %}
+</p>
+
+{% if party.notes %}
+In addition, we received these notes:
+  {{ party.notes|linebreaksbr }}
+{% endif %}
+
+You are free to make changes to your RSVP until May.  To update and correct
+any of the information in your RSVP, please visit either your personalized
+RSVP URL, href="http://rsvp.larryandlaura.us/{{ party.secret }}
+or by using your secret word, "{{ party.secret }}," on the RSVP page on our
+wedding site, http://www.larryandlaura.us/.  If you need to update your
+reservations at Ana y Jose, please contact Oscar at reservations@anayjose.com.  If you have any other questions please reply to this message and we'll get back to you.
+
+For more information on getting to Tulum or the wedding, please see our
+wedding site.  Especially, please see
+http://www.larryandlaura.us/tulum/getting-there for information about arriving
+in Tulum, http://www.larryandlaura.us/tulum/faq for information about arranging
+in advance to have your necessary vaccinations and passports, and
+http://www.larryandlaura.us/things-to-do for information about fun things
+to do while you are there.
+
+  See you there,
+    Larry and Larua
