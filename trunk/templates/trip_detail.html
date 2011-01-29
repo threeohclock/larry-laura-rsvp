@@ -10,7 +10,7 @@
 function SetButtons() {
   {% if roomnumber %}$( "#room{{ roomnumber }}" ).attr("selected", true);{% endif %}
   $( '#tripdetail_form' ).submit(ValidateForm);
-  $( '#notesfield' ).autoResize();
+  $( '#notesfield' ).autoResize(){% if notes %}.trigger('change');{% endif %};
 };
 
 function ValidateForm() {
@@ -23,7 +23,6 @@ function ValidateForm() {
     ShowError('That\'s MY room, you cheeky bastard!');
     return false;
   }
-  $( "#tripsubmit" ).attr("disabled", 'disabled');
 };
 
 

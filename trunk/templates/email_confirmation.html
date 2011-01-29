@@ -21,7 +21,7 @@
 </tr>
 
 <tr>
-<td style="background-color:#9BC5DB;border-top:0px solid #333333;border-bottom:10px solid #FFFFFF;"><center><IMG id=editableImg1 SRC="http://www.datavortex.net/email/beach.jpg" BORDER="0" title="Larry and Lauras Wedding"  alt="Larry and Laura 2011" align="center"></center></td>
+<td style="background-color:#9BC5DB;border-top:0px solid #333333;border-bottom:10px solid #FFFFFF;"><center><IMG id=editableImg1 SRC="http://www.datavortex.net/email/beach.jpg" BORDER="0" title="Larry and Lauras Wedding" alt="Larry and Laura 2011" align="center"></center></td>
 </tr>
 
 
@@ -33,10 +33,9 @@
 <td bgcolor="#3B5F7B" valign="top" style="font-size:12px;color:#CEDBDF;line-height:150%;font-family:trebuchet ms;">
 
 <p>
-<span style="font-size:20px;font-weight:bold;color:#B0DAE9;font-family:arial;line-height:110%;">We are thankful to have the {{ party.size|apnumber }} of you</span><br>
-<span style="font-size:11px;font-weight:normal;color:#;font-style:italic;font-family:arial;">Quisque dignissim dictum ante</span><br>
-We have received your RSVP for {{ people }}.  Also, we have you down for {{ meals }} meal{{ party.size|pluralize }}{% if hidden_worlds %}, and {{ hidden_worlds }} joining us at Hidden Worlds on the 12th.{% else %}.   {% endif %}
-{%if room %}If you haven&rsquo;t reserved your room at Ana y Jos&eacute;, which is {{ room }} (room number {{ party.room_number }}), please contact Oscar as soon as possible to do so.
+<span style="font-size:20px;font-weight:bold;color:#B0DAE9;font-family:arial;line-height:110%;">We are thankful to have {% ifnotequal party.size 1 %} the {{ party.size|apnumber }} of {% endifnotequal %}you join us</span><br>
+We have received your RSVP for {{ people }}.  Also, we have you down for {{ party.size|pluralize:"a,"}} {{ meals }} meal{{ party.size|pluralize }}{% if hidden_worlds %}, and {{ hidden_worlds }} joining us at Hidden Worlds on the 12th.{% else %}.   {% endif %}
+{%if room %}If you haven&rsquo;t reserved your room at Ana y Jos&eacute;, which is {{ room }} (room number {{ party.room_number }}), please <a style="color:#99FFEB;" href="http://www.anayjose.com/contact-us/">contact Oscar</a> as soon as possible to do so.
 {% else %}You noted that your reservation is with another hotel or resort.  If you need help getting to Ana y Jos&eacute; for the ceremony and reception, or if you decide you would like to stay with us, please reply.
 {% endif %}
 </p>
