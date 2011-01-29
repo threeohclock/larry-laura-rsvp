@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import confirmation_mail
 from datetime import datetime
 from google.appengine.ext import db
 from google.appengine.api import mail
@@ -245,8 +244,8 @@ class TripDetails(RequestHandler):
     party.put()
 
     self.DEBUG('Room number: %s<br />Notes: "%s"' % (party.room_number, party.notes))
-    #if not DEBUGGING:
 
+    #if not DEBUGGING:
     # Create the body of the message (a plain-text and an HTML version).
     template_vars = {'party': party,
                      'people': PrettyList([p.name for p in party.people]),
@@ -260,7 +259,10 @@ class TripDetails(RequestHandler):
                    subject=subject,
                    body=text,
                    html=html)
-    self.WriteTemplate('confirmation.html', {'party': party})
+    template_vars = {'domain': party.email.split('@')[1],
+                     'room': room,
+                     'party': party}
+    self.WriteTemplate('confirmation.html', template_vars)
 
 def main():
    application = webapp.WSGIApplication([('/', LandingWithoutKeyword),
