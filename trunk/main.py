@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from datetime import datetime
+import datetime
 from google.appengine.ext import db
 from google.appengine.api import mail
 from google.appengine.ext import webapp
@@ -16,6 +16,7 @@ DEBUGGING = False
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 ORDINALS = ('First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth')
 FOOD_CHOICES = ('Steak', 'Fish', 'Vegetarian')
+DEADLINE = datetime.date(2011, 1, 1)
 
 ROOMS = {0: 'We are staying elsewhere',
          1: 'Amanecer',
@@ -66,8 +67,9 @@ class Person(db.Model):
   modified_date = db.DateTimeProperty(auto_now_add=True)
 
 class RequestHandler(webapp.RequestHandler):
-  def WriteTemplate(self, filename, kwargs):
-    self.response.out.write(template.render(os.path.join(TEMPLATE_DIR, filename), kwargs))
+  def WriteTemplate(self, filename, template_vars):
+    template_vars['deadline'] = DEADLINE # always include RSVP due date
+    self.response.out.write(template.render(os.path.join(TEMPLATE_DIR, filename), template_vars))
 
   def DEBUG(self, msg):
     if not DEBUGGING:
@@ -181,8 +183,9 @@ class YesOrNo(RequestHandler):
     self.DEBUG('coming: "%s"' % coming)
     if coming == 'no':
       party.is_coming = False
+      party.confirmed_once = True
       party.put()
-      self.WriteTemplate('notcoming.html', {'secret': party.secret_word})
+      self.WriteTemplate('notcoming.html', {'secret': party.secret})
       return
     if coming == 'yes':
       party.is_coming = True
@@ -275,7 +278,8 @@ class TripDetails(RequestHandler):
 
   def SendConfirmation(self, party, subject, room):
     """Send a multipart MIME message to the person who just RSVPd."""
-    template_vars = {'party': party,
+    template_vars = {'deadline' : DEADLINE,
+                     'party': party,
                      'people': PrettyList(Names(party)),
                      'room': room,
                      'hidden_worlds': PrettyList([p.name.split()[0] for p in party.people.order('creation_date') if p.hidden_worlds]),
