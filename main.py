@@ -12,7 +12,7 @@ from appengine_utilities import sessions
 
 template.register_template_library('django.contrib.humanize.templatetags.humanize')
 
-DEBUGGING = True
+DEBUGGING = False
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 ORDINALS = ('First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth')
 FOOD_CHOICES = ('Steak', 'Fish', 'Vegetarian')
@@ -182,7 +182,7 @@ class YesOrNo(RequestHandler):
     if coming == 'no':
       party.is_coming = False
       party.put()
-      self.WriteTemplate('notcoming.html', {})
+      self.WriteTemplate('notcoming.html', {'secret': party.secret_word})
       return
     if coming == 'yes':
       party.is_coming = True
