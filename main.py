@@ -264,8 +264,17 @@ class TripDetails(RequestHandler):
 
     self.DEBUG('Room number: %s<br />Notes: "%s"' % (party.room_number, party.notes))
 
-    #if not DEBUGGING:
-    # Create the body of the message (a plain-text and an HTML version).
+    if not DEBUGGING:
+      self.SendConfirmation(party, subject, room)
+
+    template_vars = {'domain': party.email.split('@')[1],
+                     'not_first': confirmed_once,
+                     'room': room,
+                     'party': party}
+    self.WriteTemplate('confirmation.html', template_vars)
+
+  def SendConfirmation(self, party, subject, room):
+    """Send a multipart MIME message to the person who just RSVPd."""
     template_vars = {'party': party,
                      'people': PrettyList(Names(party)),
                      'room': room,
@@ -278,11 +287,6 @@ class TripDetails(RequestHandler):
                    subject=subject,
                    body=text,
                    html=html)
-    template_vars = {'domain': party.email.split('@')[1],
-                     'not_first': confirmed_once,
-                     'room': room,
-                     'party': party}
-    self.WriteTemplate('confirmation.html', template_vars)
 
 def main():
    application = webapp.WSGIApplication([('/', LandingWithoutKeyword),
