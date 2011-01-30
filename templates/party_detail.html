@@ -7,6 +7,7 @@ function ShowHideTextFields() {
   var people = parseInt($('input:radio[name=coming]:checked').val());
   if (!people) { return; }
   $( "#nameinstructions" ).show();
+  $( "#foodallergies" ).show();
   for (i=1;i<=people;i++) {
     var box = $( "#namebox" + i );
     if (box.is(':hidden')) {
@@ -78,7 +79,14 @@ function ValidateForm() {
         <label for="radio{{ forloop.counter }}">{{ forloop.counter|apnumber|capfirst }}</label>
       {% endfor %}
     </div>
-<p id="nameinstructions">Confirm, add, or remove names from your invitation, and let us know your dinner preference <span id="mealhelp" class="ui-state-default ui-corner-all ui-icon ui-icon-help helpbutton" title="Help with meal selection"></span><br /> and whether you would like to join us at the Hidden Worlds Adventure Park <span id="hiddenworldshelp" class="ui-state-default ui-corner-all ui-icon ui-icon-help helpbutton" title="Help with Hidden Worlds selection"></span>.</p>
+<p id="nameinstructions">Change or confirm people from your invitation and their buffet dinner <span id="mealhelp" class="ui-state-default ui-corner-all ui-icon ui-icon-help helpbutton" title="Help with meal selection"></span><br />and Hidden Worlds Adventure Park <span id="hiddenworldshelp" class="ui-state-default ui-corner-all ui-icon ui-icon-help helpbutton" title="Help with Hidden Worlds selection"></span> attendance preferences.
+  <div id="foodallergies" class="ui-widget rsvpalert">
+    <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;">
+      <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+      Please make sure to note all food allergies on the next page.
+    </div>
+  </div>
+</p>
     <div id="nameboxes">
       {% for i in 1to8 %}
         <div class="namebox_container" id="namebox{{ forloop.counter }}">
@@ -107,6 +115,6 @@ function ValidateForm() {
     <input id="partysubmit" type="submit" />
   </form>
 </p>
-<div id="mealhelptext" class="helpdialog">Although we are planning to serve a buffet-style dinner, your selections here will help our caterers prepare enough food so that you can receive your preferred meal.  If you have special needs or food allergies, please tell us in the notes field on the next page.</div>
+<div id="mealhelptext" class="helpdialog">Although we are planning to serve a buffet-style dinner, your selections here will help our caterers prepare the right amounts of food so that you can receive your preferred meal.  If you have special needs or food allergies, please tell us in the notes field on the next page.</div>
 <div id="hiddenworldshelptext" class="helpdialog">We are planning a trip to the Hidden Worlds Cenote Adventure Park for the day after the wedding.  For each guest listed here, please click the &quot;Hidden Worlds&quot; button if he or she would like to attend, and we will follow up with you via email.  For more information on the event, please <a href="http://www.larryandlaura.us/things-to-do/hidden-worlds" target="_blank">see the page for it</a>.</div>
 {% endblock %}
