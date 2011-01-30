@@ -3,13 +3,13 @@
 {% block title %}{% if not_first %}Your RSVP has been updated!{% else %}Your RSVP is confirmed!{% endif %}{% endblock %}
 
 {% block content %}
-<p>Thanks for {% if not_first %}updating {% endif%}your RSVP!  We have sent an email to your address at {{ domain }}, confirming the following details:<br />
+<p>Thanks for {% if not_first %}updating {% endif%}your RSVP, {{ party.name }}!<br />
+We have sent an email to your address at {{ domain }}, confirming your {% if not_first %}changes{% else %}details{% endif %}:<br />
 
-The name of your party is {{ party.name }}, and you will be 
 {% if room %}
-joining us at Ana y Jos&eacute; in room {{ room }} (number {{ party.room_number }}).
+You will join us at Ana y Jos&eacute; in room {{ room }} (number {{ party.room_number }}).
 {% else %}
-staying at a hotel other than Ana y Jos&eacute;.
+You will be staying at a hotel other than Ana y Jos&eacute;.
 {% endif %}
 </p>
 <p>The {{ party.size }} people in your party are:
@@ -21,15 +21,9 @@ staying at a hotel other than Ana y Jos&eacute;.
 {% endfor %}
 </ul>
 </div>
-
 {% if party.notes %}And you added the following notes:
   <blockquote>{{ party.notes|linebreaksbr }}</blockquote>
 {% endif %}
-
-If you need to make any changes, please just return to your <a
-  href="http://rsvp.larryandlaura.us/{{ party.secret }}">personalized page</a>
-and you can modify anything you have submitted here.  The deadline for changes
-is May 1, 2011.
-
+You can change anything in your resevation until {{ deadline|date }} at your <a href="http://rsvp.larryandlaura.us/{{ party.secret }}">personalized page</a>
 </p>
 {% endblock %}

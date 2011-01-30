@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 
 {% block title %}Sorry you can't make it!{% endblock %}
-{% block progress %}100{% endblock %}
 
 {% block content %}
 <p><h2>Sorry to hear it!</h2></p>
-<p>We will miss you at our wedding, but thank you for taking the time to RSVP!.  You can modufy your RSVP at any time up until the deadline on May 1, 2011 by returning here using either your <a target="_blank" href="http://rsvp.larryandlaura.us/{{ secret }}">personalized address</a>, or by entering your secret word, &quot;{{ secret }}&quot; into the RSVP page on our <a href="http://www.larryandlaura.us/" target="_blank">wedding site</a>.
+<p id="notcoming">We will miss you at our wedding, but thank you for taking the time to RSVP!.  You can modify your RSVP at any time up until the deadline on {{ deadline|date }} by returning here using either your <a target="_blank" href="http://rsvp.larryandlaura.us/{{ secret }}">personalized address</a>, or by entering your secret word, &quot;{{ secret }}&quot; into the RSVP page on our <a href="http://www.larryandlaura.us/" target="_blank">wedding site</a>.
 {% endblock %}
