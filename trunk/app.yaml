@@ -12,3 +12,4 @@ handlers:
   script: main.py
 builtins:
 - datastore_admin: on
+- remote_api: on
