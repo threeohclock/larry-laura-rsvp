@@ -9,12 +9,11 @@ from google.appengine.ext.webapp import util
 from google.appengine.ext.webapp import template
 from appengine_utilities import sessions
 
-
 template.register_template_library('django.contrib.humanize.templatetags.humanize')
 
-DEBUGGING = False
+DEBUGGING = True
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
-ORDINALS = ('First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth')
+ORDINALS = ('First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth')
 FOOD_CHOICES = ('Steak', 'Fish', 'Vegetarian')
 DEADLINE = datetime.date(2011, 1, 1)
 
@@ -22,7 +21,6 @@ ROOMS = {0: 'We are staying elsewhere',
          1: 'Amanecer',
          2: 'Brisa del Mar',
          3: 'Nube',
-         4: 'Lluvia',
          5: 'Sol',
          6: 'Luna',
          7: 'Tulum',
@@ -47,6 +45,7 @@ JsDate = lambda pydate: pydate.strftime(JQUERY_DATE_FORMAT)
 Names = lambda party: [p.name for p in party.people.order('creation_date')]
 
 class Party(db.Model):
+  """Represents one party, meaning one invitation receipient."""
   name = db.StringProperty(required=True)
   secret = db.StringProperty(required=True)
   email = db.EmailProperty(required=True)
@@ -54,11 +53,13 @@ class Party(db.Model):
   size = db.IntegerProperty()
   room_number = db.IntegerProperty()
   notes = db.TextProperty()
+  receive_invitation = db.BooleanProperty(default=True)
   creation_date = db.DateTimeProperty(auto_now=True)
   modified_date = db.DateTimeProperty(auto_now_add=True)
   confirmed_once = db.BooleanProperty()
 
 class Person(db.Model):
+  """One human being.  There many be one or more Persons per Party."""
   name = db.StringProperty(required=True)
   meal = db.StringProperty(choices=set(FOOD_CHOICES))
   party = db.ReferenceProperty(Party, collection_name='people')
@@ -67,7 +68,9 @@ class Person(db.Model):
   modified_date = db.DateTimeProperty(auto_now_add=True)
 
 class RequestHandler(webapp.RequestHandler):
+  """Subclass RequestHandler to add some convenience methods."""
   def WriteTemplate(self, filename, template_vars):
+    """Write out to a template in the standard template directory."""
     template_vars['deadline'] = DEADLINE # always include RSVP due date
     self.response.out.write(template.render(os.path.join(TEMPLATE_DIR, filename), template_vars))
 
@@ -103,6 +106,19 @@ def GetSession():
 
 
 def PrettyList(unpretty_list):
+  """Take a list of items and make it human-readable in a nice Enlgish format:
+  ['an item']                      ->  'an item'
+  ['item one', 'item two']         -> 'item one and item two'
+  ['one', 'two', 'three']          -> 'one, two and three'
+  ['one', 'two', 'three', 'four']  -> 'one, two, three and four'
+  ... 
+
+  Args:
+    unpretty_list: A list of things to be printed.
+
+  Returns:
+    string: A print-ready human-readable list of things, '' for empty list.
+  """
   if not unpretty_list:
     return ''
   if len(unpretty_list) == 1:
@@ -191,7 +207,7 @@ class YesOrNo(RequestHandler):
       party.is_coming = True
       party.put()
       template_vars = {'size': party.size,
-                       '1to8': map(None, ORDINALS, party.people.order('creation_date'))}
+                       '1to6': map(None, ORDINALS, party.people.order('creation_date'))}
       self.WriteTemplate('party_detail.html', template_vars)
       return
     self.ERROR('Please select either yes or no!', 'is_coming.html', {'name': party.name})
@@ -234,7 +250,10 @@ class PartyDetails(RequestHandler):
       if name in added_guests:
         Person(name=name, meal=guests[name][0], hidden_worlds=guests[name][1], party=party).put()
 
-    template_vars = {'roomnumber': party.room_number, 'notes': party.notes, 'rooms': ROOMS}
+    template_vars = {'roomnumber': party.room_number,
+                     'notes': party.notes,
+                     'rooms': ROOMS,
+                     'invitation': party.receive_invitation}
     self.WriteTemplate('trip_detail.html', template_vars)
     self.DEBUG('Coming count: "%s"<br>Names are: %s' % (party.size, Names(party)))
     for guest in party.people.order('creation_date'):
@@ -248,6 +267,7 @@ class TripDetails(RequestHandler):
       return
     room = self.request.get('roomnumber')
     party.notes = self.request.get('notes')
+    invitation = self.request.get('invitation')
 
     if room:
       party.room_number = int(room)
@@ -255,6 +275,11 @@ class TripDetails(RequestHandler):
       room = ROOMS[party.room_number]
     else:
       room = False
+
+    if invitation == 'False':
+      party.receive_invitation = False
+    else:
+      party.receive_invitation = True
 
     confirmed_once = party.confirmed_once
     if confirmed_once:

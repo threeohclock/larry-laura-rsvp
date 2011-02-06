@@ -25,11 +25,19 @@
   margin-right: auto;
   text-align: center;
 }
+#tripdetail_form {
+  margin-top: 0px;
+}
 #roomnumber {
-  margin-bottom: 30px;
+  margin-bottom: 0px;
 }
 #hotelfields {
-  margin-top: 30px;
+  margin-top: 15px;
+}
+#invitation {
+  margin: 0px;
+  font-size: 9pt;
+  padding: 0px;
 }
 #hotelnamediv {
   margin-top: 40px;
@@ -59,6 +67,13 @@
   margin-left: auto;
   margin-right: auto;
   display: none;
+}
+#notesinput {
+  padding: 0px;
+}
+.borderless {
+  margin-bottom: 0px;
+  padding: 0px;
 }
 .rsvpalert {
   font-size: 11pt;

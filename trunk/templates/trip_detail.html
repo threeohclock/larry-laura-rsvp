@@ -11,6 +11,12 @@ function SetButtons() {
   {% if roomnumber %}$( "#room{{ roomnumber }}" ).attr("selected", true);{% endif %}
   $( '#tripdetail_form' ).submit(ValidateForm);
   $( '#notesfield' ).autoResize(){% if notes %}.trigger('change');{% endif %};
+  $( "#invitation" ).buttonset();
+};
+
+function SetupHelp() {
+  $( "#invitationhelptext" ).dialog({autoOpen: false, title: 'Paper Invitation Help', width: 400});
+  $( '#invitationhelp' ).click(function() {$( "#invitationhelptext" ).dialog('open');});
 };
 
 function ValidateForm() {
@@ -32,11 +38,22 @@ function ValidateForm() {
 {{ block.super }}
   SetupAutoResize(jQuery)
   SetButtons();
+  SetupHelp();
 {% endblock %}
 
 {% block content %}
-<p>Please tell us some details about your trip.
-  <form action="/tripdetail" id="tripdetail_form" method="post">
+<p class="borderless">Would you like to receive a paper invitation? <span id="invitationhelp" class="ui-state-default ui-corner-all ui-icon ui-icon-help helpbutton" title="Get help"></span></p>
+<form action="/tripdetail" id="tripdetail_form" method="post" class="borderless">
+  <div id="invitation">
+        <input type="radio" id="invitationyes" value="True" name="invitation"
+          {% if invitation %}checked="checked"{% endif %} />
+        <label for="invitationyes">Yes</label>
+        <input type="radio" id="invitationno" value="False" name="invitation"
+          {% if not invitation %}checked="checked"{% endif %} />
+        <label for="invitationno">No</label>
+  </div>
+
+<p class="borderless">Also, please tell us some details about your trip.</p>
     <div id="hotelfields">
       Your <a href="http://www.larryandlaura.us/ana-y-jose" target="_blank">Ana y Jos&eacute;</a> room number and name
       <select id="roomnumber" name="roomnumber">
@@ -45,12 +62,13 @@ function ValidateForm() {
           <option value="{{ room.0 }}" id="room{{ room.0 }}">{% if room.0 %}{{ room.0 }} - {% endif %}{{ room.1 }}</option>
         {% endfor %}
       </select>
-      <div id="notesinput">
-        Please enter any additional notes, especially food allergies or other concerns:<br />
+      <p id="notesinput">
+        Please enter any notes, especially food allergies,<br />
+        dietary restrictions, or disability access needs:<br />
         <textarea id="notesfield" name="notes">{% if notes %}{{ notes }}{% endif %}</textarea>
-      </div>
+      </p>
     </div>
    <input id="tripsubmit" type="submit" value="Submit RSVP" />
   </form>
-</p>
+<div id="invitationhelptext" class="helpdialog">By default, we will send to you via postal mail a paper invitation to the same address where you received your save the date card.  All of the information contained within the paper invitation is also on our wedding site and in your email invitation.  If you don&rsquo;t wish to receive a paper invitation, you may opt out using the button on this page.</div>
 {% endblock %}
