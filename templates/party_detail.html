@@ -14,7 +14,7 @@ function ShowHideTextFields() {
       box.show('slide', {direction: "left"}, "slow");
     }
   };
-  for (i=people + 1;i<=8;i++) {
+  for (i=people + 1;i<=6;i++) {
     var box = $( "#namebox" + i );
     if (!box.is(':hidden')) {
       box.hide('slide', {direction: "left"}, "slow");
@@ -25,7 +25,7 @@ function ShowHideTextFields() {
 function SetButtons() {
   {% if size %}$( "#radio{{ size }}" ).attr("checked", "checked");{% endif %}
   $( "#radio" ).buttonset();
-  for (i=1;i<=8;i++) {
+  for (i=1;i<=6;i++) {
     $( "#meal" + i).buttonset();
     $( "#hiddenworlds" + i).button();
   }
@@ -74,7 +74,7 @@ function ValidateForm() {
 
     <form action="/partydetail" id="partydetail_form" method="post">
     <div id="radio">
-      {% for i in 1to8 %}
+      {% for i in 1to6 %}
         <input type="radio" id="radio{{ forloop.counter }}" value="{{ forloop.counter }}" name="coming" />
         <label for="radio{{ forloop.counter }}">{{ forloop.counter|apnumber|capfirst }}</label>
       {% endfor %}
@@ -88,7 +88,7 @@ function ValidateForm() {
   </div>
 </p>
     <div id="nameboxes">
-      {% for i in 1to8 %}
+      {% for i in 1to6 %}
         <div class="namebox_container" id="namebox{{ forloop.counter }}">
           <label for='name{{ forloop.counter }}' class="nameboxlabel">{{ i.0 }} guest</label>
           <input type="text" name="name{{ forloop.counter }}" class="namebox"
