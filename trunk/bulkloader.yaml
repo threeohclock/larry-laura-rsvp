@@ -42,9 +42,14 @@ transformers:
       import_transform: transform.none_if_empty(int)
 
     - property: notes
-      external_name: Nones
+      external_name: Notes
       import_transform: db.Text
 
+    - property: receive_invitation
+      external_name: PaperInvite
+
+    - property: is_coming
+      external_name: IsComing
 
 - kind: Person
   connector: csv
