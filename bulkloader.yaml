@@ -66,11 +66,11 @@ transformers:
 
     - property: vegetarian
       external_name: Vegetarian
-      import_transform: transform.regexp_bool('true', re.IGNORECASE)
+      #import_transform: transform.regexp_bool('true', re.IGNORECASE)
 
     - property: hidden_worlds
       external_name: HiddenWorlds
-      import_transform: transform.regexp_bool('true', re.IGNORECASE)
+      #import_transform: transform.regexp_bool('true', re.IGNORECASE)
 
     - property: party
       external_name: PID
