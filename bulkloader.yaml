@@ -64,8 +64,8 @@ transformers:
     - property: name
       external_name: Name
 
-    - property: meal
-      external_name: Meal
+    - property: vegetarian
+      external_name: Vegetarian
 
     - property: hidden_worlds
       external_name: HiddenWorlds
