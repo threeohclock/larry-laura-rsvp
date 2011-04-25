@@ -34,7 +34,9 @@
 
 <p>
 <span style="font-size:20px;font-weight:bold;color:#B0DAE9;font-family:arial;line-height:110%;">We are thankful to have {% ifnotequal party.size 1 %} the {{ party.size|apnumber }} of {% endifnotequal %}you join us</span><br>
-We have received your RSVP for {{ people }}.  Also, we have you down for {{ party.size|pluralize:"a,"}} {{ meals }} meal{{ party.size|pluralize }}{% if hidden_worlds %}, and {{ hidden_worlds }} joining us at Hidden Worlds on the 12th.{% else %}.   {% endif %}
+We have received your RSVP for {{ people }}.
+{% if vegetarians %}  Also, we have {{ vegetarians }} marked as preferring a vegetarian meal{% if hidden_worlds %}, and {% endif %}{% else %}{% if hidden_worlds %}  Also, we have marked {% endif %}{% endif %}{% if hidden_worlds %}{{ hidden_worlds }} as scheduled to join us at Hidden Worlds on the 12th.{% else %}{% if vegetarians %}.{% endif %}{% endif %}
+
 {%if room %}If you haven&rsquo;t reserved your room at Ana y Jos&eacute;, which is {{ room }} (room number {{ party.room_number }}), please <a style="color:#99FFEB;" href="http://www.anayjose.com/contact-us/">contact Oscar</a> as soon as possible to do so.
 {% else %}You noted that your reservation is with another hotel or resort.  If you need help getting to Ana y Jos&eacute; for the ceremony and reception, or if you decide you would like to stay with us, please reply.
 {% endif %}

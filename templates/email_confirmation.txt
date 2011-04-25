@@ -1,9 +1,9 @@
-{% filter wordwrap:80 %}
+{% filter wordwrap:90 %}
 Thanks for your RSVP to our wedding!
 
 We are thankful to have {% ifnotequal party.size 1 %}the {{ party.size|apnumber }} of {% endifnotequal %}you join us for this special day.
 
-We have received your RSVP for {{ people }}.  Also, we have you down for {{ party.size|pluralize:"a,"}} {{ meals }} meal{{ party.size|pluralize }}{% if hidden_worlds %}, and {{ hidden_worlds }} joining us at Hidden Worlds on the 12th.{% else %}.   {% endif %}
+We have received your RSVP for {{ people }}.{% if vegetarians %}  Also, we have {{ vegetarians }} marked as preferring a vegetarian meal{% if hidden_worlds %}, and {% endif %}{% else %}{% if hidden_worlds %}  Also, we have marked {% endif %}{% endif %}{% if hidden_worlds %}{{ hidden_worlds }} as scheduled to join us at Hidden Worlds on the 12th.{% else %}{% if vegetarians %}.{% endif %}{% endif %}
 
 {%if room %}If you haven't reserved your room at Ana y Jose, which is {{ room }} (room number {{ party.room_number }}), please contact Oscar at reservations@anayjose.com as soon as possible to do so.{% else %}You noted that your reservation is with another hotel or resort.  If you need help getting to Ana y Jose for the ceremony and reception, or if you decide you would like to stay with us, please reply.{% endif %}
 {% if party.notes %}

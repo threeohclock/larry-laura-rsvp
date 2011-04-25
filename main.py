@@ -15,7 +15,7 @@ DEBUGGING = False
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 ORDINALS = ('First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth')
 VEGETARIAN = 'Vegetarian'
-DEADLINE = datetime.date(2011, 1, 1)
+DEADLINE = datetime.date(2011, 8, 1)
 
 ROOMS = {0: 'We are staying elsewhere',
          1: 'Amanecer',

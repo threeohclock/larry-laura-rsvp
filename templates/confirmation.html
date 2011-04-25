@@ -16,8 +16,7 @@ You will be staying at a hotel other than Ana y Jos&eacute;.
 <div id="guestlist">
 <ul style="text-align: left">
 {% for p in party.people %}
-<li> {{ p.name }}, preferring a {{ p.meal|lower }} dinner
-{% if p.hidden_worlds %} and joining us at Hidden Worlds{% endif %}</li>
+<li> {{ p.name }}{% if p.vegetarian %}, preferring a vegetarian dinner{% if p.hidden_worlds %} and {% endif %}{% endif %}{% if p.hidden_worlds %}{% if not p.vegetarian %}, {% endif %}joining us at Hidden Worlds{% endif %}</li>
 {% endfor %}
 </ul>
 </div>
