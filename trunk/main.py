@@ -11,10 +11,10 @@ from appengine_utilities import sessions
 
 template.register_template_library('django.contrib.humanize.templatetags.humanize')
 
-DEBUGGING = True
+DEBUGGING = False
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 ORDINALS = ('First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth')
-FOOD_CHOICES = ('Steak', 'Fish', 'Vegetarian')
+VEGETARIAN = 'Vegetarian'
 DEADLINE = datetime.date(2011, 1, 1)
 
 ROOMS = {0: 'We are staying elsewhere',
@@ -61,7 +61,7 @@ class Party(db.Model):
 class Person(db.Model):
   """One human being.  There many be one or more Persons per Party."""
   name = db.StringProperty(required=True)
-  meal = db.StringProperty(choices=set(FOOD_CHOICES))
+  vegetarian = db.BooleanProperty()
   party = db.ReferenceProperty(Party, collection_name='people')
   hidden_worlds = db.BooleanProperty()
   creation_date = db.DateTimeProperty(auto_now=True)
@@ -90,7 +90,7 @@ class RequestHandler(webapp.RequestHandler):
     self.NAVERROR()
 
   def GetUserFromSession(self):
-    try: 
+    try:
       sess = GetSession()
       party = Party.get_by_id(sess['party_key_id'])
     except:
@@ -98,7 +98,6 @@ class RequestHandler(webapp.RequestHandler):
     if not party:
       self.ERROR('Failure trying to look up your account from your session, please re-enter your secret word', 'get_keyword.html')
     return party
-
 
 
 def GetSession():
@@ -111,7 +110,7 @@ def PrettyList(unpretty_list):
   ['item one', 'item two']         -> 'item one and item two'
   ['one', 'two', 'three']          -> 'one, two and three'
   ['one', 'two', 'three', 'four']  -> 'one, two, three and four'
-  ... 
+  ...
 
   Args:
     unpretty_list: A list of things to be printed.
@@ -131,6 +130,8 @@ def PrettyList(unpretty_list):
 
 class PopulateTestData(RequestHandler):
   def get(self):
+    if not DEBUGGING:
+      return
     foo = Party(name='Test Party 1',
                 secret='foo',
                 email='datavortex+test@gmail.com').put()
@@ -142,9 +143,9 @@ class PopulateTestData(RequestHandler):
                 secret='baz',
                 email='datavortex+test@gmail.com',
                 size=5).put()
-    Person(name='Person One', meal='Steak', party=baz).put()
-    Person(name='Person Two', meal='Fish', hidden_worlds=False, party=baz).put()
-    Person(name='Person Three', meal='Vegetarian', hidden_worlds=True, party=baz).put()
+    Person(name='Person One', vegetarian=True, party=baz).put()
+    Person(name='Person Two', hidden_worlds=False, party=baz).put()
+    Person(name='Person Three', vegetarian=False, hidden_worlds=True, party=baz).put()
     self.DEBUG('Created test data.')
 
 class LandingWithoutKeyword(RequestHandler):
@@ -224,14 +225,20 @@ class PartyDetails(RequestHandler):
     guests = {}  # No dictionary comprehensions in appengine's python 2.x
     ordered_names = []
     # Make a dictionary keyed by guest name and keep a list of the names in order
+    self.DEBUG(str(self.request.arguments()))
     for guest_number in range(1, party.size+1):
       name = self.request.get('name%s' % guest_number).strip()
-      meal = self.request.get('meal%s' % guest_number)
+      self.DEBUG('NAME: %s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;VEGETARIAN: %s' %
+                 (name, self.request.get('vegetarian%s' % guest_number)))
+      if self.request.get('vegetarian%s' % guest_number):
+        vegetarian = True
+      else:
+        vegetarian = False
       if self.request.get('hiddenworlds%s' % guest_number):
         hiddenworlds = True
       else:
         hiddenworlds = False
-      guests[name] = (meal, hiddenworlds)
+      guests[name] = (vegetarian, hiddenworlds)
       ordered_names.append(name)
     # Sets help decide if we should do an update, delete, and/or add
     existing_guests = set(Names(party))
@@ -241,14 +248,14 @@ class PartyDetails(RequestHandler):
     [p.delete() for p in party.people.filter('name IN', list(existing_guests - new_guests))]
     # Now that they're gone, update whoever is left
     for guest in party.people:
-      guest.meal = guests[guest.name][0]
+      guest.vegetarian = guests[guest.name][0]
       guest.hidden_worlds = guests[guest.name][1]
       guest.put()
     # And add the new people in order, so we can sort them by creation date later
     added_guests = new_guests.difference(existing_guests)
     for name in ordered_names:
       if name in added_guests:
-        Person(name=name, meal=guests[name][0], hidden_worlds=guests[name][1], party=party).put()
+        Person(name=name, vegetarian=guests[name][0], hidden_worlds=guests[name][1], party=party).put()
 
     template_vars = {'roomnumber': party.room_number,
                      'notes': party.notes,
@@ -257,7 +264,8 @@ class PartyDetails(RequestHandler):
     self.WriteTemplate('trip_detail.html', template_vars)
     self.DEBUG('Coming count: "%s"<br>Names are: %s' % (party.size, Names(party)))
     for guest in party.people.order('creation_date'):
-      self.DEBUG('PERSON: Name: %s, Meal: %s, Hidden Worlds: %s' % (guest.name, guest.meal, guest.hidden_worlds))
+      self.DEBUG('PERSON: Name: %s, Vegetarian: %s, Hidden Worlds: %s' %
+                 (guest.name, guest.vegetarian, guest.hidden_worlds))
 
 class TripDetails(RequestHandler):
   def post(self):
@@ -307,8 +315,12 @@ class TripDetails(RequestHandler):
                      'party': party,
                      'people': PrettyList(Names(party)),
                      'room': room,
-                     'hidden_worlds': PrettyList([p.name.split()[0] for p in party.people.order('creation_date') if p.hidden_worlds]),
-                     'meals': PrettyList(list(set([p.meal.lower() for p in party.people])))}
+                     'hidden_worlds': PrettyList([p.name.split()[0] for p in
+                                                  party.people.order('creation_date')
+                                                  if p.hidden_worlds]),
+                     'vegetarians': PrettyList([p.name.split()[0] for p in
+                                                party.people.order('creation_date')
+                                                if p.vegetarian])}
     text = template.render(os.path.join(TEMPLATE_DIR, 'email_confirmation.txt'), template_vars)
     html = template.render(os.path.join(TEMPLATE_DIR, 'email_confirmation.html'), template_vars)
     mail.send_mail(sender='Larry and Laura <11-11-11@larryandlaura.us>',
