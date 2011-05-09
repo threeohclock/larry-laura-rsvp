@@ -329,6 +329,48 @@ class TripDetails(RequestHandler):
                    body=text,
                    html=html)
 
+class Report(RequestHandler):
+  def get(self):
+    """Write up a progress report for the admins."""
+    coming = []
+    not_coming = []
+    no_response = []
+    invitations = []
+    no_invitation = []
+    rooms = []
+    hidden_worlds = []
+    vegetarians = []
+    for party in Party.all():
+      if party.room_number:
+        rooms.append({'room': party.room_number, 'name': party.name})
+      if party.is_coming == True:
+        coming.append(party)
+        if party.receive_invitation in (True, None):
+          invitations.append(party)
+        else:
+          no_invitation.append(party)
+        for person in party.people:
+          if person.vegetarian:
+            vegetarians.append(person)
+          if person.hidden_worlds:
+            hidden_worlds.append(person)
+      elif party.is_coming == False:
+        not_coming.append(party)
+        no_invitation.append(party)
+      elif party.is_coming == None:
+        no_response.append(party)
+        invitations.append(party)
+
+    template_vars = {'coming': coming,
+                     'not_coming': not_coming,
+                     'no_response': no_response,
+                     'invitations': invitations,
+                     'hidden_worlds': hidden_worlds,
+                     'vegetarians': vegetarians,
+                     'rooms': rooms}
+    self.WriteTemplate('report.html', template_vars)
+
+
 def main():
    application = webapp.WSGIApplication([('/', LandingWithoutKeyword),
                                          ('/test', PopulateTestData),
@@ -336,6 +378,7 @@ def main():
                                          ('/yesorno', YesOrNo),
                                          ('/partydetail', PartyDetails),
                                          ('/tripdetail', TripDetails),
+                                         ('/tinythongbikini', Report),
                                          ('/.{1,20}', SecretWord)],
                                         debug=DEBUGGING)
    util.run_wsgi_app(application)
