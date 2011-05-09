@@ -336,7 +336,7 @@ def main():
                                          ('/yesorno', YesOrNo),
                                          ('/partydetail', PartyDetails),
                                          ('/tripdetail', TripDetails),
-                                         ('/.{1,10}', SecretWord)],
+                                         ('/.{1,20}', SecretWord)],
                                         debug=DEBUGGING)
    util.run_wsgi_app(application)
 
