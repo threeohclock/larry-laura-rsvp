@@ -42,9 +42,9 @@ function ValidateForm() {
 {% endblock %}
 
 {% block content %}
-<p class="borderless">Would you like to receive a paper invitation? <span id="invitationhelp" class="ui-state-default ui-corner-all ui-icon ui-icon-help helpbutton" title="Get help"></span></p>
+<p class="nomorepaperinvites">Would you like to receive a paper invitation? <span id="invitationhelp" class="ui-state-default ui-corner-all ui-icon ui-icon-help helpbutton" title="Get help"></span></p>
 <form action="/tripdetail" id="tripdetail_form" method="post" class="borderless">
-  <div id="invitation">
+  <div class="nomorepaperinvites" id="invitation">
         <input type="radio" id="invitationyes" value="True" name="invitation"
           {% if invitation %}checked="checked"{% endif %} />
         <label for="invitationyes">Yes</label>
