@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>RSVP Report</title></head>
+<body>
+  <p><h2>People Coming</h2>
+  <ul>
+    {% for party in coming %}
+    <li>{{party.name}}, {{party.size}} people, room {{party.room_number}}
+    {% if party.notes %}<br />{{ party.notes }}<br />{% endif %}
+      {% for person in party.people %}
+      {{person.name}}, 
+      {% endfor %}
+    </li>
+    {% endfor %}
+  </ul>
+  </p>
+  <p><h2>People Not Coming</h2>
+  <ul>
+    {% for party in not_coming %}
+    <li>{{party.name}}, {{party.size}} people
+    {% if party.room_number %}, room {{party.room_number}}{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {{no_response|length}} people have not replied.
+  </p>
+  <p><h2>Paper Invitations</h2>
+    {{ invitations|length }} paper invitations needed.
+  </p>
+  <p><h2>Hidden Worlds</h2>
+    {{ hidden_worlds|length }} people going.
+  </p>
+  <p><h2>Vegetarians</h2>
+    {{ vegetarians|length }} people.
+  </p>
+  <p><h2>Rooms</h2>
+   {% for r in rooms|dictsort:"room" %}
+     {{ r.room }} : {{ r.name }}
+   {% endfor %}
+  </p>
+</body>
+</html>
