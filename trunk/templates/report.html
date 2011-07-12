@@ -16,7 +16,7 @@
           {% else %}Staying elsewhere{% endif %}
         <br />{{party.size}} people:
         {% for person in party.people %}
-          {{person.name}}, 
+          {{person.name}}{% if not forloop.last %},{% endif %} 
         {% endfor %}
       {% if party.notes %}<br />{{ party.notes }}<br />{% endif %}
     </li>
@@ -24,7 +24,7 @@
   </ul>
   </p>
   <p><h2>People Not Coming</h2>
-  <h3>Parties: {{not_coming|length}} 
+  <h3>Parties: {{not_coming|length}}</h3>
   <ul>
     {% for party in not_coming %}
     <li>{{party.name}}, {{party.size}} people
@@ -33,9 +33,10 @@
   </ul>
   <h3>{{no_response|length}} people have not replied.</h3>
   </p>
-  <p><h2>Paper Invitations</h2>
+<!--  <p><h2>Paper Invitations</h2>
     {{ invitations|length }} paper invitations needed.
   </p>
+-->
   <p><h2>Hidden Worlds</h2>
     {{ hidden_worlds|length }} people going.
   </p>

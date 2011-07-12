@@ -341,10 +341,10 @@ class Report(RequestHandler):
     hidden_worlds = []
     vegetarians = []
     people = 0
-    newest = None
-    freshest = Party.all().order('modified_date').get().modified_date
+    freshest = Party.all().filter('modified_date !=', None).order('-modified_date').get().modified_date
+    newest = Party.all().filter('creation_date !=', None).order('-creation_date').get().creation_date
 
-    for party in Party.all().order('creation_date'):
+    for party in Party.all():
       if not newest:
         newest = party.creation_date
       if party.room_number:
@@ -368,7 +368,8 @@ class Report(RequestHandler):
         no_response.append(party)
         invitations.append(party)
 
-    template_vars = {'coming': coming,
+    cdate = lambda p: p.creation_date
+    template_vars = {'coming': sorted(coming, key=cdate, reverse=True),
                      'not_coming': not_coming,
                      'no_response': no_response,
                      'invitations': invitations,
