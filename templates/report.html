@@ -2,26 +2,36 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head><title>RSVP Report</title></head>
 <body>
+<p>
+  Newest RSVP creation: {{newest|date:"D M d Y P"}}<br />
+  Newest RSVP update: {{freshest|date:"D M d Y P"}}
+</p>
   <p><h2>People Coming</h2>
+  <h3>Parties: {{coming|length}}<br />People: {{people}}</h3>
   <ul>
     {% for party in coming %}
-    <li>{{party.name}}, {{party.size}} people, room {{party.room_number}}
-    {% if party.notes %}<br />{{ party.notes }}<br />{% endif %}
-      {% for person in party.people %}
-      {{person.name}}, 
-      {% endfor %}
+    <li>
+      {{party.name}},
+          {% if party.room_number %}Room {{party.room_number}}
+          {% else %}Staying elsewhere{% endif %}
+        <br />{{party.size}} people:
+        {% for person in party.people %}
+          {{person.name}}, 
+        {% endfor %}
+      {% if party.notes %}<br />{{ party.notes }}<br />{% endif %}
     </li>
     {% endfor %}
   </ul>
   </p>
   <p><h2>People Not Coming</h2>
+  <h3>Parties: {{not_coming|length}} 
   <ul>
     {% for party in not_coming %}
     <li>{{party.name}}, {{party.size}} people
     {% if party.room_number %}, room {{party.room_number}}{% endif %}</li>
     {% endfor %}
   </ul>
-  {{no_response|length}} people have not replied.
+  <h3>{{no_response|length}} people have not replied.</h3>
   </p>
   <p><h2>Paper Invitations</h2>
     {{ invitations|length }} paper invitations needed.
@@ -34,7 +44,7 @@
   </p>
   <p><h2>Rooms</h2>
    {% for r in rooms|dictsort:"room" %}
-     {{ r.room }} : {{ r.name }}
+     {{ r.room }} : {{ r.name }}<br />
    {% endfor %}
   </p>
 </body>

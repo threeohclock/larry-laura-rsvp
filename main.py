@@ -340,7 +340,13 @@ class Report(RequestHandler):
     rooms = []
     hidden_worlds = []
     vegetarians = []
-    for party in Party.all():
+    people = 0
+    newest = None
+    freshest = Party.all().order('modified_date').get().modified_date
+
+    for party in Party.all().order('creation_date'):
+      if not newest:
+        newest = party.creation_date
       if party.room_number:
         rooms.append({'room': party.room_number, 'name': party.name})
       if party.is_coming == True:
@@ -350,6 +356,7 @@ class Report(RequestHandler):
         else:
           no_invitation.append(party)
         for person in party.people:
+          people += 1
           if person.vegetarian:
             vegetarians.append(person)
           if person.hidden_worlds:
@@ -367,7 +374,10 @@ class Report(RequestHandler):
                      'invitations': invitations,
                      'hidden_worlds': hidden_worlds,
                      'vegetarians': vegetarians,
-                     'rooms': rooms}
+                     'rooms': rooms,
+                     'people': people,
+                     'newest': newest,
+                     'freshest': freshest}
     self.WriteTemplate('report.html', template_vars)
 
 
