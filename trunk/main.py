@@ -343,7 +343,7 @@ class Report(RequestHandler):
     people = 0
     freshest = Party.all().filter('modified_date !=', None).order('-modified_date').get().modified_date
     newest = Party.all().filter('creation_date !=', None).order('-creation_date').get().creation_date
-
+    
     for party in Party.all():
       if not newest:
         newest = party.creation_date
@@ -368,13 +368,17 @@ class Report(RequestHandler):
         no_response.append(party)
         invitations.append(party)
 
+    vegetarians_names = PrettyList([v.name for v in vegetarians])
+    hidden_worlds_names = PrettyList([h.name for h in hidden_worlds])
     cdate = lambda p: p.creation_date
     template_vars = {'coming': sorted(coming, key=cdate, reverse=True),
-                     'not_coming': not_coming,
-                     'no_response': no_response,
+                     'not_coming': sorted(not_coming, key=cdate, reverse=True),
+                     'no_response': sorted(no_response, key=cdate, reverse=True),
                      'invitations': invitations,
                      'hidden_worlds': hidden_worlds,
+                     'hidden_worlds_names': hidden_worlds_names,
                      'vegetarians': vegetarians,
+                     'vegetarians_names': vegetarians_names,
                      'rooms': rooms,
                      'people': people,
                      'newest': newest,
@@ -389,7 +393,7 @@ def main():
                                          ('/yesorno', YesOrNo),
                                          ('/partydetail', PartyDetails),
                                          ('/tripdetail', TripDetails),
-                                         ('/tinythongbikini', Report),
+                                         ('/totallysafeforwork', Report),
                                          ('/.{1,20}', SecretWord)],
                                         debug=DEBUGGING)
    util.run_wsgi_app(application)

@@ -1,13 +1,19 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>RSVP Report</title></head>
+<head><title>RSVP Report</title>
+<style type="text/css">
+.highlight {
+  background-color: lightblue;
+}
+</style>
+</head>
 <body>
 <p>
   Newest RSVP creation: {{newest|date:"D M d Y P"}}<br />
   Newest RSVP update: {{freshest|date:"D M d Y P"}}
 </p>
   <p><h2>People Coming</h2>
-  <h3>Parties: {{coming|length}}<br />People: {{people}}</h3>
+  <h3><span class="highlight">Parties: {{coming|length}}<br />People: {{people}}</span></h3>
   <ul>
     {% for party in coming %}
     <li>
@@ -24,24 +30,24 @@
   </ul>
   </p>
   <p><h2>People Not Coming</h2>
-  <h3>Parties: {{not_coming|length}}</h3>
+  <h3><span class="highlight">Parties: {{not_coming|length}}</span></h3>
   <ul>
     {% for party in not_coming %}
     <li>{{party.name}}, {{party.size}} people
     {% if party.room_number %}, room {{party.room_number}}{% endif %}</li>
     {% endfor %}
   </ul>
-  <h3>{{no_response|length}} people have not replied.</h3>
+  <h3><span class="highlight">{{no_response|length}} parties have not replied.</span></h3>
   </p>
 <!--  <p><h2>Paper Invitations</h2>
     {{ invitations|length }} paper invitations needed.
   </p>
 -->
   <p><h2>Hidden Worlds</h2>
-    {{ hidden_worlds|length }} people going.
+    <span class="highlight">{{ hidden_worlds|length }} people</span> going: {{hidden_worlds_names}}
   </p>
   <p><h2>Vegetarians</h2>
-    {{ vegetarians|length }} people.
+    <span class="highlight">{{ vegetarians|length }} people</span>: {{vegetarians_names}}
   </p>
   <p><h2>Rooms</h2>
    {% for r in rooms|dictsort:"room" %}
