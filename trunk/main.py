@@ -338,17 +338,20 @@ class Report(RequestHandler):
     invitations = []
     no_invitation = []
     rooms = []
+    staying_elsewhere = []
     hidden_worlds = []
     vegetarians = []
     people = 0
     freshest = Party.all().filter('modified_date !=', None).order('-modified_date').get().modified_date
     newest = Party.all().filter('creation_date !=', None).order('-creation_date').get().creation_date
-    
+
     for party in Party.all():
       if not newest:
         newest = party.creation_date
       if party.room_number:
         rooms.append({'room': party.room_number, 'name': party.name})
+      elif party.room_number == 0:
+        staying_elsewhere.append(party)
       if party.is_coming == True:
         coming.append(party)
         if party.receive_invitation in (True, None):
@@ -371,15 +374,17 @@ class Report(RequestHandler):
     vegetarians_names = PrettyList([v.name for v in vegetarians])
     hidden_worlds_names = PrettyList([h.name for h in hidden_worlds])
     cdate = lambda p: p.creation_date
-    template_vars = {'coming': sorted(coming, key=cdate, reverse=True),
-                     'not_coming': sorted(not_coming, key=cdate, reverse=True),
-                     'no_response': sorted(no_response, key=cdate, reverse=True),
+    by_cdate = lambda p: sorted(p, key=cdate, reverse=True)
+    template_vars = {'coming': by_cdate(coming),
+                     'not_coming': by_cdate(not_coming),
+                     'no_response': by_cdate(no_response),
                      'invitations': invitations,
                      'hidden_worlds': hidden_worlds,
                      'hidden_worlds_names': hidden_worlds_names,
                      'vegetarians': vegetarians,
                      'vegetarians_names': vegetarians_names,
                      'rooms': rooms,
+                     'staying_elsewhere': by_cdate(staying_elsewhere),
                      'people': people,
                      'newest': newest,
                      'freshest': freshest}
