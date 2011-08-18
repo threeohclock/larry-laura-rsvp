@@ -18,17 +18,21 @@
     {% for party in coming %}
     <li>
       {{party.name}},
-          {% if party.room_number %}Room {{party.room_number}}
-          {% else %}Staying elsewhere{% endif %}
+      {% if party.room_number %}Room {{party.room_number}}{% endif %}
+      {% ifequal party.room_number 0 %}Staying elsewhere{% endifequal %}
+      {% if not party.room_number %}{% ifnotequal party.room_number 0 %}
+        <span style="color: red; font-weight: bold;">NO ROOM</span>
+      {% endifnotequal %}{% endif %}
         <br />{{party.size}} people:
         {% for person in party.people %}
-          {{person.name}}{% if not forloop.last %},{% endif %} 
+          {{person.name}}{% if not forloop.last %},{% endif %}
         {% endfor %}
       {% if party.notes %}<br />{{ party.notes }}<br />{% endif %}
     </li>
     {% endfor %}
   </ul>
   </p>
+  <div style="float: left">
   <p><h2>People Not Coming</h2>
   <h3><span class="highlight">Parties: {{not_coming|length}}</span></h3>
   <ul>
@@ -37,22 +41,46 @@
     {% if party.room_number %}, room {{party.room_number}}{% endif %}</li>
     {% endfor %}
   </ul>
-  <h3><span class="highlight">{{no_response|length}} parties have not replied.</span></h3>
   </p>
-<!--  <p><h2>Paper Invitations</h2>
-    {{ invitations|length }} paper invitations needed.
+  </div>
+  <div style="float: right; width: 50%">
+  <p><h2>Slackers</h2>
+  <h3><span class="highlight">Parties: {{no_response|length}}</span></h3>
+  <ul>
+    {% for party in no_response %}
+    <li>{{party.name}}, {{party.size}} people
+    {% if party.room_number %}, room {{party.room_number}}{% endif %}</li>
+    {% endfor %} </ul>
   </p>
--->
+  </div>
+  <!-- <p><h2>Paper Invitations</h2>
+         {{ invitations|length }} paper invitations needed.
+       </p>
+  -->
+  <div style="clear: both;">
   <p><h2>Hidden Worlds</h2>
     <span class="highlight">{{ hidden_worlds|length }} people</span> going: {{hidden_worlds_names}}
   </p>
   <p><h2>Vegetarians</h2>
     <span class="highlight">{{ vegetarians|length }} people</span>: {{vegetarians_names}}
-  </p>
+    </p>
+
+  </div>
+  <div style="float: left; width: 50%">
   <p><h2>Rooms</h2>
    {% for r in rooms|dictsort:"room" %}
      {{ r.room }} : {{ r.name }}<br />
    {% endfor %}
+   </p>
+ </div>
+   <div style="float: right; width: 50%">
+     <p><h2>People Staying Elsewhere</h2>
+  <ul>
+    {% for party in staying_elsewhere %}
+    <li>{{party.name}}</li>
+    {% endfor %}
+  </ul>
   </p>
+</div>
 </body>
 </html>
