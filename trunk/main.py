@@ -348,12 +348,12 @@ class Report(RequestHandler):
     for party in Party.all():
       if not newest:
         newest = party.creation_date
-      if party.room_number:
-        rooms.append({'room': party.room_number, 'name': party.name})
-      elif party.room_number == 0:
-        staying_elsewhere.append(party)
       if party.is_coming == True:
         coming.append(party)
+        if party.room_number:
+          rooms.append({'room': party.room_number, 'name': party.name})
+        elif party.room_number == 0:
+          staying_elsewhere.append(party)
         if party.receive_invitation in (True, None):
           invitations.append(party)
         else:
