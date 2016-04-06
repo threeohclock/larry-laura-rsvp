@@ -1,0 +1,1 @@
+A personal project to collect wedding RSVPs through appengine.
